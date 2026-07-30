@@ -1077,54 +1077,100 @@ INIT
   goPage('home');
 })();
 </script>
-  <!-- แท็บเมนูด้านล่าง 5 ปุ่ม (Bottom Navigation) -->
+<!-- ========================================================= -->
+<!-- 1. ส่วนโครงสร้างหน้าจอทั้ง 5 หน้า (Full Screen Pages) -->
+<!-- ========================================================= -->
+
+<!-- หน้าที่ 1: หน้าแรก (POS) -->
+<div id="tab-home" class="app-page w-full min-h-screen pb-24 p-4">
+  <h1 class="text-2xl font-bold text-gray-800 mb-4">หน้าแรก (รายการสั่งซื้อ)</h1>
+  <p class="text-gray-500">ใส่โค้ดรายการอาหาร/สินค้า ตรงนี้</p>
+</div>
+
+<!-- หน้าที่ 2: โต๊ะ -->
+<div id="tab-tables" class="app-page hidden w-full min-h-screen pb-24 p-4 bg-gray-50">
+  <h1 class="text-2xl font-bold text-gray-800 mb-4">จัดการโต๊ะ</h1>
+  <p class="text-gray-500">ใส่โค้ดผังโต๊ะ/เลือกโต๊ะ ตรงนี้</p>
+</div>
+
+<!-- หน้าที่ 3: ประวัติรายการขาย -->
+<div id="tab-history" class="app-page hidden w-full min-h-screen pb-24 p-4 bg-gray-50">
+  <h1 class="text-2xl font-bold text-gray-800 mb-4">ประวัติรายการขาย</h1>
+  <p class="text-gray-500">ใส่โค้ดประวัติการขาย/ตารางบิลย้อนหลัง ตรงนี้</p>
+</div>
+
+<!-- หน้าที่ 4: คลังสินค้า -->
+<div id="tab-stock" class="app-page hidden w-full min-h-screen pb-24 p-4 bg-gray-50">
+  <h1 class="text-2xl font-bold text-gray-800 mb-4">คลังสินค้า (สต็อก)</h1>
+  <p class="text-gray-500">ใส่โค้ดการจัดการสต็อก/เพิ่มลดสินค้า ตรงนี้</p>
+</div>
+
+<!-- หน้าที่ 5: โปรไฟล์ -->
+<div id="tab-profile" class="app-page hidden w-full min-h-screen pb-24 p-4 bg-gray-50">
+  <h1 class="text-2xl font-bold text-gray-800 mb-4">โปรไฟล์ & ตั้งค่า</h1>
+  <p class="text-gray-500">ใส่โค้ดข้อมูลร้าน/โปรไฟล์ผู้ใช้งาน ตรงนี้</p>
+</div>
+
+<!-- ========================================================= -->
+<!-- 2. ส่วนแท็บเมนูด้านล่าง 5 ปุ่ม (Bottom Navigation) -->
+<!-- ========================================================= -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 z-50 shadow-lg">
   <!-- 1. หน้าแรก -->
-  <button onclick="switchTab('tab-home')" class="flex flex-col items-center text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-home', this)" class="nav-btn flex flex-col items-center text-orange-600 focus:outline-none">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
     <span class="text-xs mt-1 font-medium">หน้าแรก</span>
   </button>
 
   <!-- 2. โต๊ะ -->
-  <button onclick="switchTab('tab-tables')" class="flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-tables', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
     <span class="text-xs mt-1 font-medium">โต๊ะ</span>
   </button>
 
   <!-- 3. ประวัติรายการขาย -->
-  <button onclick="switchTab('tab-history')" class="flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-history', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
     <span class="text-xs mt-1 font-medium">ประวัติรายการขาย</span>
   </button>
 
   <!-- 4. คลังสินค้า -->
-  <button onclick="switchTab('tab-stock')" class="flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-stock', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
     <span class="text-xs mt-1 font-medium">คลังสินค้า</span>
   </button>
 
   <!-- 5. โปรไฟล์ -->
-  <button onclick="switchTab('tab-profile')" class="flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-profile', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
     <span class="text-xs mt-1 font-medium">โปรไฟล์</span>
   </button>
 </nav>
 
-<!-- JavaScript สั้นๆ สำหรับสลับหน้าแบบเต็มจอ -->
+<!-- ========================================================= -->
+<!-- 3. ส่วน JavaScript สำหรับสลับหน้า + เปลี่ยนสีปุ่มที่เลือก -->
+<!-- ========================================================= -->
 <script>
-function switchTab(tabId) {
-  // ซ่อนทุกหน้าที่มี class เป็น 'app-page'
-  const pages = document.querySelectorAll('.app-page');
-  pages.forEach(page => page.classList.add('hidden'));
+function switchTab(tabId, btnElement) {
+  // 1. ซ่อนทุกหน้า
+  document.querySelectorAll('.app-page').forEach(page => page.classList.add('hidden'));
 
-  // แสดงเฉพาะหน้าโดนกดแบบเต็มจอ
+  // 2. เปิดเฉพาะหน้าที่เลือก
   const targetPage = document.getElementById(tabId);
   if (targetPage) {
     targetPage.classList.remove('hidden');
   }
+
+  // 3. เปลี่ยนสีปุ่มเมนู (ให้ปุ่มที่กดกลายเป็นสีส้ม)
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('text-orange-600');
+    btn.classList.add('text-gray-500');
+  });
+  if (btnElement) {
+    btnElement.classList.remove('text-gray-500');
+    btnElement.classList.add('text-orange-600');
+  }
 }
 </script>
-
 
 </body>
 </html>
