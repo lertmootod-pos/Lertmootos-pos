@@ -314,6 +314,15 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 
 <div id="toast-container"></div>
 
+<!-- Persistent debug log panel -->
+<div id="debug-panel" style="position:fixed;left:0;right:0;bottom:0;max-height:40vh;overflow-y:auto;background:#111827;color:#d1fae5;font-family:monospace;font-size:11px;padding:8px 10px;z-index:9999;display:none;white-space:pre-wrap;border-top:3px solid #f97316;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+<strong style="color:#fbbf24;">DEBUG LOG (แตะเพื่อคัดลอก/ปิด)</strong>
+<button onclick="document.getElementById('debug-panel').style.display='none'" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:2px 8px;font-size:11px;">ปิด</button>
+</div>
+<div id="debug-log-content"></div>
+</div>
+
 <!-- Generic modal shell -->
 <div id="generic-modal-backdrop" class="modal-backdrop hidden" onclick="if(event.target===this) closeGenericModal()">
 <div class="modal-sheet" id="generic-modal-body"></div>
@@ -348,6 +357,28 @@ function toast(msg){
   document.getElementById('toast-container').appendChild(el);
   setTimeout(()=>el.remove(), 2200);
 }
+function debugLog(label, data){
+  try{
+    const panel = document.getElementById('debug-panel');
+    const content = document.getElementById('debug-log-content');
+    if(!panel || !content) return;
+    panel.style.display = 'block';
+    const time = new Date().toLocaleTimeString('th-TH');
+    let detail = '';
+    try{ detail = typeof data==='string' ? data : JSON.stringify(data, Object.getOwnPropertyNames(data||{})); }catch(e){ detail = String(data); }
+    const line = document.createElement('div');
+    line.style.borderBottom = '1px solid #374151';
+    line.style.padding = '4px 0';
+    line.textContent = '['+time+'] '+label+': '+detail;
+    content.prepend(line);
+  }catch(e){}
+}
+window.addEventListener('error', function(e){
+  debugLog('JS ERROR', (e && e.message) ? (e.message+' @ '+e.filename+':'+e.lineno) : e);
+});
+window.addEventListener('unhandledrejection', function(e){
+  debugLog('UNHANDLED PROMISE REJECTION', (e && e.reason) ? e.reason : e);
+});
 function escapeHtml(s){
   return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -436,6 +467,10 @@ async function fetchAll(){
     sb.from('order_item_addons').select('*'),
     sb.from('shop_settings').select('*').eq('id',1).maybeSingle()
   ]);
+  const namedResults = {categories:cat, products:prod, addon_groups:ag, addon_options:ao, product_addon_groups:pag, tables:tbl, orders:ord, order_items:oi, order_item_addons:oia, shop_settings:ss};
+  Object.keys(namedResults).forEach(tname=>{
+    if(namedResults[tname] && namedResults[tname].error){ console.error('fetch '+tname+' error', namedResults[tname].error); debugLog('fetch '+tname+' error', namedResults[tname].error); }
+  });
   state.categories = cat.data || [];
   state.products = prod.data || [];
   state.addonGroups = ag.data || [];
@@ -681,7 +716,7 @@ async function submitOrder(){
   let order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
   if(!order){
     const {data, error} = await sb.from('orders').insert({table_id: state.currentTableId, status:'open', total:0}).select().single();
-    if(error){ toast('เกิดข้อผิดพลาด: '+error.message); return; }
+    if(error){ console.error('orders insert error', error); debugLog('orders insert error', error); toast('เกิดข้อผิดพลาด: '+error.message); return; }
     order = data;
   }
   const submittedItems = [];
@@ -690,13 +725,13 @@ async function submitOrder(){
       order_id: order.id, product_id: item.product_id, product_name: item.product_name,
       unit_price: item.unit_price, qty: item.qty, note: item.note || null, cancelled:false
     }).select().single();
-    if(error){ console.error('order_items insert error', error); toast('เกิดข้อผิดพลาด: '+error.message); continue; }
+    if(error){ console.error('order_items insert error', error); debugLog('order_items insert error ('+item.product_name+')', error); toast('เกิดข้อผิดพลาด: '+error.message); continue; }
     submittedItems.push({item, addons: item.addons});
     if(item.addons.length){
       const {error: addonsErr} = await sb.from('order_item_addons').insert(item.addons.map(a=>({
         order_item_id: oi.id, addon_option_id: a.option_id, addon_name: a.name, price_delta: a.price_delta, qty: a.qty||1
       })));
-      if(addonsErr){ console.error('order_item_addons insert error', addonsErr); toast('เกิดข้อผิดพลาด (ตัวเลือกเสริม): '+addonsErr.message); }
+      if(addonsErr){ console.error('order_item_addons insert error', addonsErr); debugLog('order_item_addons insert error', addonsErr); toast('เกิดข้อผิดพลาด (ตัวเลือกเสริม): '+addonsErr.message); }
     }
     if(item.print) submittedItems[submittedItems.length-1].doPrint = true;
   }
