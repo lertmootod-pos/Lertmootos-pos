@@ -841,14 +841,42 @@ async function cancelOrderItem(orderItemId){
   toast('ยกเลิกรายการแล้ว');
   await fetchAll();
 }
-async function closeBill(){
+function closeBill(){
   const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
   if(!order) return;
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id));
+  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>Number(a.id)-Number(b.id));
   const total = items.reduce((s,i)=>s+itemLineTotal(i),0);
   if(items.length===0){ toast('ยังไม่มีรายการสั่ง'); return; }
-  if(!confirm('ยืนยันปิดบิลยอด '+money(total)+' ?')) return;
-  await sb.from('orders').update({status:'paid', total, closed_at:new Date().toISOString()}).eq('id', order.id);
+  const t = state.tablesList.find(x=>String(x.id)===String(state.currentTableId));
+  const ss = state.shopSettings || {};
+  const rows = items.map(i=>{
+    const addons = state.orderItemAddons.filter(a=>String(a.order_item_id)===String(i.id));
+    const addonsLine = addons.length ? '<p class="text-[11px] text-gray-400 mt-0.5">'+addons.map(a=>escapeHtml(a.addon_name)+(a.qty>1?(' x'+a.qty):'')).join(', ')+'</p>' : '';
+    return '<div class="flex justify-between items-start text-sm py-1.5 border-b border-orange-50 last:border-0">'
+      + '<div class="min-w-0 pr-2"><p class="font-semibold">'+i.qty+'x '+escapeHtml(i.product_name)+'</p>'+addonsLine+'</div>'
+      + '<p class="font-bold text-gray-700 shrink-0">'+money(itemLineTotal(i))+'</p></div>';
+  }).join('');
+  const qrHtml = ss.qr_image_url
+    ? '<div class="text-center mt-3"><p class="text-xs font-bold text-gray-500 mb-2">สแกน QR เพื่อชำระเงิน</p><img src="'+ss.qr_image_url+'" class="w-48 h-48 object-contain mx-auto rounded-xl border border-orange-100"></div>'
+    : '';
+  document.getElementById('generic-modal-body').innerHTML =
+    '<div class="flex items-center justify-between mb-3"><h3 class="font-bold text-lg">สรุปบิล — '+(t?escapeHtml(t.name):'')+'</h3>'
+    + '<button onclick="closeGenericModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div>'
+    + '<div class="max-h-64 overflow-y-auto hide-scrollbar">'+rows+'</div>'
+    + '<div class="flex justify-between items-center mt-3 pt-3 border-t border-orange-100">'
+    + '<span class="font-bold text-gray-600">ยอดรวมทั้งหมด</span>'
+    + '<span class="font-bold text-xl text-orange-600">'+money(total)+'</span></div>'
+    + qrHtml
+    + '<label class="flex items-center gap-2 text-sm font-semibold text-gray-600 mt-4">'
+    + '<input type="checkbox" id="payment-print-input" '+(ss.auto_print ? 'checked':'')+'> พิมพ์ใบเสร็จหลังชำระเงิน</label>'
+    + '<button onclick="confirmClosePayment('+order.id+','+total+')" class="w-full mt-4 py-3 bg-gray-900 text-white rounded-full text-sm font-bold tap">ยืนยันชำระเงิน</button>';
+  showGenericModal(); lucide.createIcons();
+}
+async function confirmClosePayment(orderId, total){
+  const shouldPrint = document.getElementById('payment-print-input').checked;
+  if(shouldPrint) printReceipt();
+  await sb.from('orders').update({status:'paid', total, closed_at:new Date().toISOString()}).eq('id', orderId);
+  closeGenericModal();
   toast('ปิดบิลเรียบร้อย');
   await fetchAll();
   switchTab('tab-tables');
