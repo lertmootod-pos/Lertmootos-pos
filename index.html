@@ -1239,22 +1239,29 @@ function switchTab(tabId, btnElement) {
     <span class="text-xs mt-1 font-medium">โปรไฟล์</span>
   </button>
 </nav>
-
-<!-- JavaScript สลับหน้า -->
 <script>
 function switchTab(tabId, btnElement) {
-  // ซ่อนทุกหน้าที่เพิ่มใหม่
+  // 1. ซ่อนทุกหน้าใหม่
   document.querySelectorAll('.app-page').forEach(page => page.classList.add('hidden'));
 
-  // ถ้ากดหน้าอื่นที่ไม่ใช่หน้าแรก ให้เปิดหน้านั้นแบบลอยทับเต็มจอ
-  if (tabId !== 'tab-home') {
+  // 2. ดึงส่วนโครงสร้างหน้าหลักเดิมทั้งหมดเพื่อสั่งซ่อน/แสดง
+  const mainElements = document.querySelectorAll('body > *:not(.app-page):not(nav):not(script)');
+
+  if (tabId === 'tab-home') {
+    // ถ้านะกด "หน้าแรก" -> โชว์หน้าหลักเดิมทั้งหมด
+    mainElements.forEach(el => el.style.display = '');
+  } else {
+    // ถ้ากดปุ่มอื่น -> ซ่อนหน้าหลักเดิมทิ้งทันที!
+    mainElements.forEach(el => el.style.display = 'none');
+    
+    // แสดงเฉพาะหน้าใหม่ที่เลือก
     const targetPage = document.getElementById(tabId);
     if (targetPage) {
       targetPage.classList.remove('hidden');
     }
   }
 
-  // เปลี่ยนสีไฮไลต์ของปุ่ม
+  // 3. เปลี่ยนสีปุ่มเมนู (ส้ม/เทา)
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.classList.remove('text-orange-600');
     btn.classList.add('text-gray-500');
