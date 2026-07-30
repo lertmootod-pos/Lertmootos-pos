@@ -456,14 +456,14 @@ FETCH DATA & REALTIME
 ============================================================ */
 async function fetchAll(){
   const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([
-    sb.from('categories').select('*').order('sort_order'),
+    sb.from('categories').select('*').order('id'),
     sb.from('products').select('*').order('sort_order'),
     sb.from('addon_groups').select('*').order('id'),
     sb.from('addon_options').select('*').order('sort_order'),
     sb.from('product_addon_groups').select('*'),
     sb.from('tables').select('*').order('sort_order'),
     sb.from('orders').select('*').eq('status','open'),
-    sb.from('order_items').select('*').order('created_at'),
+    sb.from('order_items').select('*').order('id'),
     sb.from('order_item_addons').select('*'),
     sb.from('shop_settings').select('*').eq('id',1).maybeSingle()
   ]);
@@ -792,7 +792,7 @@ function renderOrderPage(){
     printBtn.classList.add('hidden');
     return;
   }
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>Number(a.id)-Number(b.id));
   document.getElementById('order-status-label').textContent = 'เปิดออเดอร์ • '+items.length+' รายการ';
   closeBtn.classList.remove('hidden');
   voidBtn.classList.remove('hidden');
@@ -870,7 +870,7 @@ function printReceipt(){
   const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
   const t = state.tablesList.find(x=>String(x.id)===String(state.currentTableId));
   if(!order){ toast('ยังไม่มีออเดอร์ให้พิมพ์'); return; }
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>Number(a.id)-Number(b.id));
   const ss = state.shopSettings || {};
   const paper = ss.receipt_paper || '80mm';
   const widthPx = paper==='58mm' ? '220px' : paper==='a5' ? '420px' : '300px';
@@ -1003,7 +1003,7 @@ async function saveCategory(id){
   const name = document.getElementById('cat-name-input').value.trim();
   if(!name) return toast('กรอกชื่อหมวดหมู่');
   if(id) await sb.from('categories').update({name}).eq('id', id);
-  else await sb.from('categories').insert({name, sort_order: state.categories.length});
+  else await sb.from('categories').insert({name});
   closeGenericModal(); await fetchAll();
 }
 
