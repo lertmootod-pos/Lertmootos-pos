@@ -16,18 +16,18 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
 .page{display:none;}
 .page.active{display:block;}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;}
 @media(min-width:640px){.modal-backdrop{align-items:center;}}
 .modal-sheet{background:#fff;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px;}
 @media(min-width:640px){.modal-sheet{border-radius:24px;}}
 .chip{transition:.15s;}
 .tap{transition:transform .1s;}
 .tap:active{transform:scale(.96);}
-.drawer{position:fixed;top:0;left:0;bottom:0;width:78%;max-width:300px;background:#fff;z-index:50;transform:translateX(-100%);transition:transform .25s ease;box-shadow:8px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:78%;max-width:300px;background:#fff;z-index:70;transform:translateX(-100%);transition:transform .25s ease;box-shadow:8px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;}
 .drawer.open{transform:translateX(0);}
-.drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45;opacity:0;pointer-events:none;transition:opacity .25s;}
+.drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:65;opacity:0;pointer-events:none;transition:opacity .25s;}
 .drawer-backdrop.open{opacity:1;pointer-events:auto;}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:600;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:600;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.2);}
 .stepper-btn{width:28px;height:28px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-weight:700;background:#fff7ed;color:#f97316;}
 .stepper-btn:active{transform:scale(.92);}
 #print-area{display:none;}
@@ -38,7 +38,7 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 }
 </style>
 </head>
-<body class="min-h-screen flex flex-col text-gray-800 antialiased">
+<body class="min-h-screen flex flex-col text-gray-800 antialiased pb-20">
   
 <!-- Header -->
 <header class="bg-[#f7f3ed] px-4 py-3 flex justify-between items-center sticky top-0 z-30 border-b border-orange-100">
@@ -46,7 +46,7 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 <button onclick="openDrawer()" class="p-2 bg-white rounded-full shadow-sm text-gray-700 active:scale-95 transition shrink-0">
 <i data-lucide="menu" class="w-5 h-5"></i>
 </button>
-<h1 id="header-title" class="text-lg font-bold text-gray-900 ml-1 truncate">หน้าหลัก</h1>
+<h1 id="header-title" class="text-lg font-bold text-gray-900 ml-1 truncate">หน้าหลัก / สั่งเมนู</h1>
 </div>
 <div id="header-actions" class="flex items-center gap-2 shrink-0"></div>
 </header>
@@ -59,33 +59,29 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 <p class="text-xs text-gray-400">ระบบจัดการร้าน POS</p>
 </div>
 <div class="flex flex-col p-3 gap-1 text-sm font-semibold overflow-y-auto hide-scrollbar">
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('home')"><i data-lucide="utensils" class="w-4 h-4"></i> หน้าหลัก / สั่งเมนู</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('tables')"><i data-lucide="layout-grid" class="w-4 h-4"></i> โต๊ะ / ค้างชำระ</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('dashboard')"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> แดชบอร์ดยอดขาย</button>
-<div class="h-px bg-orange-100 my-2"></div>
-<p class="px-4 text-xs text-gray-400 font-bold">ตั้งค่าร้าน</p>
+<p class="px-4 text-xs text-gray-400 font-bold my-1">ตั้งค่าร้านค้า & เมนู</p>
 <button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-categories')"><i data-lucide="tags" class="w-4 h-4"></i> หมวดหมู่สินค้า</button>
 <button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-products')"><i data-lucide="package" class="w-4 h-4"></i> จัดการเมนู/สินค้า</button>
 <button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-addons')"><i data-lucide="list-plus" class="w-4 h-4"></i> ตัวเลือกเสริม</button>
 <button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-tables')"><i data-lucide="table" class="w-4 h-4"></i> จัดการโต๊ะ</button>
 <button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-shop')"><i data-lucide="qr-code" class="w-4 h-4"></i> ร้าน / QR / บิล</button>
 </div>
-<div class="mt-auto p-4 text-[11px] text-gray-400 flex items-center gap-1.5">
+<div class="mt-auto p-4 text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-orange-100">
 <span id="realtime-dot" class="w-2 h-2 rounded-full bg-gray-300"></span> <span id="realtime-label">กำลังเชื่อมต่อ...</span>
 </div>
 </nav>
 
-<main class="flex-1 overflow-y-auto pb-36 hide-scrollbar px-4 pt-3">
+<main class="flex-1 overflow-y-auto pb-10 hide-scrollbar px-4 pt-3">
 
-<!-- ============ HOME / ORDER MENU ============ -->
+<!-- ============ PAGE 1: HOME / ORDER MENU ============ -->
 <section id="page-home" class="page active space-y-4 max-w-4xl mx-auto">
 <div id="home-table-banner" class="hidden bg-orange-500 text-white rounded-2xl px-4 py-2.5 flex items-center justify-between text-sm font-semibold">
 <span id="home-table-label"></span>
 <button onclick="goPage('order')" class="underline">ดูรายการโต๊ะนี้</button>
 </div>
-<div id="home-no-table" class="bg-white border border-orange-100 rounded-2xl p-4 text-sm text-gray-600 flex items-center justify-between">
+<div id="home-no-table" class="bg-white border border-orange-100 rounded-2xl p-4 text-sm text-gray-600 flex items-center justify-between shadow-sm">
 <span>ยังไม่ได้เลือกโต๊ะ — เลือกก่อนเริ่มสั่งเมนู</span>
-<button onclick="goPage('tables')" class="px-3 py-1.5 bg-orange-500 text-white rounded-full text-xs font-bold tap">เลือกโต๊ะ</button>
+<button onclick="switchTab('tab-tables')" class="px-3 py-1.5 bg-orange-500 text-white rounded-full text-xs font-bold tap">เลือกโต๊ะ</button>
 </div>
 <div class="relative flex items-center">
 <i data-lucide="search" class="w-5 h-5 absolute left-3.5 text-gray-400"></i>
@@ -96,28 +92,119 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="product-grid"></div>
 </section>
 
-<!-- ============ TABLES ============ -->
+<!-- ============ PAGE 2: TABLES ============ -->
 <section id="page-tables" class="page space-y-4 max-w-4xl mx-auto">
-<p class="text-xs text-gray-500">แตะที่โต๊ะเพื่อเริ่มสั่งเมนู หรือแตะไอคอนดินสอเพื่อแก้ไขชื่อโต๊ะ</p>
+<div class="flex justify-between items-center">
+  <p class="text-xs text-gray-500">แตะที่โต๊ะเพื่อเริ่มสั่งเมนู หรือกดไอคอนดินสอเพื่อแก้ไขชื่อ</p>
+  <button onclick="openTableModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap">+ เพิ่มโต๊ะ</button>
+</div>
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="tables-grid"></div>
+</section>
+
+<!-- ============ PAGE 3: HISTORY / DASHBOARD ============ -->
+<section id="page-history" class="page space-y-4 max-w-4xl mx-auto">
+<div class="flex gap-2" id="range-tabs">
+<button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
+<button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
+<button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
+<button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
+<p class="text-[11px] text-gray-400">ยอดขายรวม</p>
+<p class="font-bold text-lg text-orange-600" id="stat-total">฿0</p>
+</div>
+<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
+<p class="text-[11px] text-gray-400">จำนวนบิล</p>
+<p class="font-bold text-lg" id="stat-orders">0</p>
+</div>
+<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
+<p class="text-[11px] text-gray-400">เฉลี่ย/บิล</p>
+<p class="font-bold text-lg" id="stat-avg">฿0</p>
+</div>
+</div>
+<div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm">
+<canvas id="sales-chart" height="220"></canvas>
+</div>
+</section>
+
+<!-- ============ PAGE 4: STOCK ============ -->
+<section id="page-stock" class="page space-y-3 max-w-4xl mx-auto">
+<div class="flex justify-between items-center mb-2">
+  <p class="text-xs text-gray-500">รายการเมนูทั้งหมดในระบบ</p>
+  <button onclick="openProductModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap">+ เพิ่มเมนู</button>
+</div>
+<div id="stock-products-list" class="space-y-2"></div>
+</section>
+
+<!-- ============ PAGE 5: PROFILE & SETTINGS ============ -->
+<section id="page-profile" class="page space-y-4 max-w-md mx-auto">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-orange-100 flex items-center gap-4">
+  <div class="w-14 h-14 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-2xl font-bold shadow-md">
+    🏪
+  </div>
+  <div>
+    <h2 class="font-bold text-gray-800 text-base" id="profile-shop-name">ร้านค้าของฉัน</h2>
+    <p class="text-xs text-gray-400">ระบบ POS จัดการร้านค้า</p>
+    <span class="inline-block mt-1 text-[10px] bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">เปิดใช้งานระบบอยู่</span>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm border border-orange-100 divide-y divide-gray-100">
+  <div onclick="goPage('admin-shop')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-t-2xl">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="qr-code" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">ตั้งค่าชื่อร้าน / QR รับเงิน / บิล</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
+  <div onclick="goPage('admin-products')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="package" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">จัดการเมนูอาหารและราคา</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
+  <div onclick="goPage('admin-categories')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="tags" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">จัดการหมวดหมู่สินค้า</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
+  <div onclick="goPage('admin-addons')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="list-plus" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">จัดการท็อปปิ้ง / ตัวเลือกเสริม</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
+  <div onclick="goPage('admin-tables')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-b-2xl">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="table" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">จัดการผังโต๊ะในร้าน</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
+</div>
 </section>
 
 <!-- ============ ORDER DETAIL FOR A TABLE ============ -->
 <section id="page-order" class="page space-y-4 max-w-2xl mx-auto">
-<div class="bg-white rounded-2xl border border-orange-100 p-4 flex items-center justify-between">
+<div class="bg-white rounded-2xl border border-orange-100 p-4 flex items-center justify-between shadow-sm">
 <div>
 <p class="font-bold text-lg" id="order-table-name">-</p>
 <p class="text-xs text-gray-400" id="order-status-label">ยังไม่มีออเดอร์</p>
 </div>
 <div class="flex gap-2">
 <button onclick="voidBill()" id="order-void-btn" class="hidden px-3 py-2 bg-red-50 text-red-600 rounded-full text-xs font-bold tap">ยกเลิกบิล</button>
-<button onclick="goPage('home')" class="px-3.5 py-2 bg-orange-500 text-white rounded-full text-xs font-bold tap flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i>เพิ่มเมนู</button>
+<button onclick="switchTab('tab-home')" class="px-3.5 py-2 bg-orange-500 text-white rounded-full text-xs font-bold tap flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i>สั่งอาหารเพิ่ม</button>
 </div>
 </div>
 <div id="order-items-list" class="space-y-2"></div>
 <div id="order-empty" class="text-center text-gray-400 text-sm py-10 hidden">ยังไม่มีรายการสั่งสำหรับโต๊ะนี้</div>
 
-<div class="bg-white rounded-2xl border border-orange-100 p-4 flex items-center justify-between sticky bottom-20 gap-2">
+<div class="bg-white rounded-2xl border border-orange-100 p-4 flex items-center justify-between gap-2 shadow-sm">
 <div>
 <p class="text-xs text-gray-400">ยอดรวม</p>
 <p class="font-bold text-xl text-orange-600" id="order-total">฿0</p>
@@ -129,73 +216,42 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 </div>
 </section>
 
-<!-- ============ DASHBOARD ============ -->
-<section id="page-dashboard" class="page space-y-4 max-w-4xl mx-auto">
-<div class="flex gap-2" id="range-tabs">
-<button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
-<button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
-<button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
-<button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
-</div>
-<div class="grid grid-cols-3 gap-3">
-<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center">
-<p class="text-[11px] text-gray-400">ยอดขายรวม</p>
-<p class="font-bold text-lg text-orange-600" id="stat-total">฿0</p>
-</div>
-<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center">
-<p class="text-[11px] text-gray-400">จำนวนบิล</p>
-<p class="font-bold text-lg" id="stat-orders">0</p>
-</div>
-<div class="bg-white rounded-2xl border border-orange-100 p-3 text-center">
-<p class="text-[11px] text-gray-400">เฉลี่ย/บิล</p>
-<p class="font-bold text-lg" id="stat-avg">฿0</p>
-</div>
-</div>
-<div class="bg-white rounded-2xl border border-orange-100 p-4">
-<canvas id="sales-chart" height="220"></canvas>
-</div>
-</section>
-
-<!-- ============ ADMIN: CATEGORIES ============ -->
+<!-- ============ ADMIN PAGES ============ -->
 <section id="page-admin-categories" class="page space-y-3 max-w-2xl mx-auto">
 <button onclick="openCategoryModal()" class="w-full py-3 bg-orange-500 text-white rounded-2xl text-sm font-bold tap flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>เพิ่มหมวดหมู่</button>
 <div id="admin-categories-list" class="space-y-2"></div>
 </section>
 
-<!-- ============ ADMIN: PRODUCTS ============ -->
 <section id="page-admin-products" class="page space-y-3 max-w-2xl mx-auto">
 <button onclick="openProductModal()" class="w-full py-3 bg-orange-500 text-white rounded-2xl text-sm font-bold tap flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>เพิ่มเมนู/สินค้า</button>
 <div id="admin-products-list" class="space-y-2"></div>
 </section>
 
-<!-- ============ ADMIN: ADDON GROUPS ============ -->
 <section id="page-admin-addons" class="page space-y-3 max-w-2xl mx-auto">
-<p class="text-xs text-gray-500">สร้างกลุ่มตัวเลือกเสริม เช่น "เครื่องเคียง", "ท็อปปิ้ง" กำหนดราคา จำนวนที่เลือกได้ และไปผูกกับเมนูที่ต้องการได้ในหน้าแก้ไขเมนู</p>
+<p class="text-xs text-gray-500">สร้างกลุ่มตัวเลือกเสริม เช่น "เครื่องเคียง", "ท็อปปิ้ง"</p>
 <button onclick="openAddonGroupModal()" class="w-full py-3 bg-orange-500 text-white rounded-2xl text-sm font-bold tap flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>เพิ่มกลุ่มตัวเลือกเสริม</button>
 <div id="admin-addons-list" class="space-y-2"></div>
 </section>
 
-<!-- ============ ADMIN: TABLES ============ -->
 <section id="page-admin-tables" class="page space-y-3 max-w-2xl mx-auto">
 <button onclick="openTableModal()" class="w-full py-3 bg-orange-500 text-white rounded-2xl text-sm font-bold tap flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>เพิ่มโต๊ะ</button>
 <div id="admin-tables-list" class="space-y-2"></div>
 </section>
 
-<!-- ============ ADMIN: SHOP / QR / BILL SETTINGS ============ -->
 <section id="page-admin-shop" class="page space-y-4 max-w-md mx-auto">
-<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3">
+<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3 shadow-sm">
 <label class="text-xs font-bold text-gray-500">ชื่อร้าน</label>
 <input id="shop-name-input" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm">
 <button onclick="saveShopName()" class="w-full py-2.5 bg-orange-500 text-white rounded-full text-sm font-bold tap">บันทึกชื่อร้าน</button>
 </div>
 
-<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3">
+<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3 shadow-sm">
 <label class="text-xs font-bold text-gray-500">รูป QR สำหรับรับชำระเงิน</label>
 <img id="qr-preview" class="w-40 h-40 object-contain mx-auto rounded-xl border border-orange-100 hidden">
 <input type="file" accept="image/*" id="qr-file-input" onchange="uploadQr(this.files[0])" class="text-xs">
 </div>
 
-<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3">
+<div class="bg-white rounded-2xl border border-orange-100 p-4 space-y-3 shadow-sm">
 <p class="text-xs font-bold text-gray-700">ตั้งค่าหน้ากระดาษบิล</p>
 <label class="text-xs font-bold text-gray-500">โลโก้ร้าน (หัวบิล)</label>
 <img id="logo-preview" class="w-24 h-24 object-contain mx-auto rounded-xl border border-orange-100 hidden">
@@ -209,7 +265,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <label class="text-xs font-bold text-gray-500 block mt-2">ข้อความท้ายบิล</label>
 <textarea id="receipt-footer-input" rows="2" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm" placeholder="ขอบคุณที่ใช้บริการ"></textarea>
 <label class="flex items-center gap-2 text-xs font-bold text-gray-500 mt-2">
-<input type="checkbox" id="receipt-auto-print-input"> พิมพ์ออเดอร์อัตโนมัติทุกครั้งที่กดสั่ง (ค่าเริ่มต้น)
+<input type="checkbox" id="receipt-auto-print-input"> พิมพ์ออเดอร์อัตโนมัติทุกครั้งที่กดสั่ง
 </label>
 <button onclick="saveBillSettings()" class="w-full py-2.5 bg-orange-500 text-white rounded-full text-sm font-bold tap mt-2">บันทึกการตั้งค่าบิล</button>
 </div>
@@ -218,7 +274,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 </main>
 
 <!-- Cart bar -->
-<div id="cart-bar" class="hidden fixed bottom-16 left-0 right-0 bg-white border-t border-orange-100 p-3 z-30">
+<div id="cart-bar" class="hidden fixed bottom-16 left-0 right-0 bg-white border-t border-orange-100 p-3 z-30 shadow-lg">
 <div class="max-w-2xl mx-auto flex items-center justify-between gap-3">
 <div class="text-sm">
 <p class="font-bold" id="cart-bar-count">0 รายการ</p>
@@ -228,27 +284,31 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 </div>
 </div>
 
-<!-- แท็บเมนูด้านล่าง 5 ปุ่ม -->
+<!-- Bottom Navigation Bar 5 Tabs -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 z-50 shadow-lg">
-  <button onclick="switchBottomTab('home', this)" class="nav-btn flex flex-col items-center text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-home')" id="btn-tab-home" class="nav-btn flex flex-col items-center text-orange-600 focus:outline-none">
     <i data-lucide="utensils" class="w-5 h-5"></i>
-    <span class="text-[10px] mt-1 font-medium">หน้าแรก</span>
+    <span class="text-[11px] mt-1 font-medium">หน้าแรก</span>
   </button>
-  <button onclick="switchBottomTab('tables', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+
+  <button onclick="switchTab('tab-tables')" id="btn-tab-tables" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <i data-lucide="layout-grid" class="w-5 h-5"></i>
-    <span class="text-[10px] mt-1 font-medium">โต๊ะ</span>
+    <span class="text-[11px] mt-1 font-medium">โต๊ะ</span>
   </button>
-  <button onclick="switchBottomTab('dashboard', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
-    <i data-lucide="receipt" class="w-5 h-5"></i>
-    <span class="text-[10px] mt-1 font-medium">ประวัติ/รายงาน</span>
+
+  <button onclick="switchTab('tab-history')" id="btn-tab-history" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+    <span class="text-[11px] mt-1 font-medium">ยอดขาย</span>
   </button>
-  <button onclick="switchBottomTab('admin-products', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+
+  <button onclick="switchTab('tab-stock')" id="btn-tab-stock" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <i data-lucide="package" class="w-5 h-5"></i>
-    <span class="text-[10px] mt-1 font-medium">คลังสินค้า</span>
+    <span class="text-[11px] mt-1 font-medium">คลังสินค้า</span>
   </button>
-  <button onclick="switchBottomTab('admin-shop', this)" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
-    <i data-lucide="store" class="w-5 h-5"></i>
-    <span class="text-[10px] mt-1 font-medium">โปรไฟล์</span>
+
+  <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+    <i data-lucide="user" class="w-5 h-5"></i>
+    <span class="text-[11px] mt-1 font-medium">โปรไฟล์</span>
   </button>
 </nav>
 
@@ -267,7 +327,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 CONFIG — Supabase project
 ============================================================ */
 const SUPABASE_URL = 'https://pffganlqqmcpvytefcjz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRefiI6InBmZmdhbmxxcW1jcHZ5dGVmY2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MDc1NjcsImV4cCI6MjEwMDM4MzU2N30.Kgm3D4Z_B-4PCINof1VC5j8dX_Z-1h0boD0lZcxaAFI';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmdhbmxxcW1jcHZ5dGVmY2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MDc1NjcsImV4cCI6MjEwMDM4MzU2N30.Kgm3D4Z_B-4PCINof1VC5j8dX_Z-1h0boD0lZcxaAFI';
 const BUCKET = 'pos-images';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -292,24 +352,49 @@ function escapeHtml(s){
   return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function money(n){ return '฿'+Number(n||0).toLocaleString(); }
-window.addEventListener('unhandledrejection', e=>{ toast('เกิดข้อผิดพลาด: '+(e.reason&&e.reason.message?e.reason.message:'ไม่ทราบสาเหตุ')); });
-window.addEventListener('error', e=>{ if(e.message) toast('เกิดข้อผิดพลาด: '+e.message); });
 
 /* ============================================================
-NAV / DRAWER / PAGES
+NAV / TAB SWITCHING
 ============================================================ */
 const titles = {
-  home:'หน้าหลัก / สั่งเมนู', tables:'โต๊ะ / ค้างชำระ', order:'รายการสั่งของโต๊ะ', dashboard:'แดชบอร์ดยอดขาย',
+  home:'หน้าหลัก / สั่งเมนู', tables:'จัดการโต๊ะ / ค้างชำระ', history:'แดชบอร์ดยอดขาย',
+  stock:'คลังสินค้า / จัดการเมนู', profile:'โปรไฟล์ & ตั้งค่าร้าน', order:'รายการสั่งของโต๊ะ',
   'admin-categories':'หมวดหมู่สินค้า', 'admin-products':'จัดการเมนู/สินค้า', 'admin-addons':'ตัวเลือกเสริม',
   'admin-tables':'จัดการโต๊ะ', 'admin-shop':'ร้าน / QR / บิล'
 };
 let currentPage = 'home';
 
+function switchTab(tabId) {
+  const pageMap = {
+    'tab-home': 'home',
+    'tab-tables': 'tables',
+    'tab-history': 'history',
+    'tab-stock': 'stock',
+    'tab-profile': 'profile'
+  };
+  
+  const pageName = pageMap[tabId] || 'home';
+  goPage(pageName);
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('text-orange-600');
+    btn.classList.add('text-gray-500');
+  });
+  
+  const activeBtn = document.getElementById('btn-' + tabId);
+  if(activeBtn) {
+    activeBtn.classList.remove('text-gray-500');
+    activeBtn.classList.add('text-orange-600');
+  }
+}
+
 function goPage(p){
   currentPage = p;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  const target = document.getElementById('page-'+p);
-  if(target) target.classList.add('active');
+  
+  const targetPage = document.getElementById('page-'+p);
+  if(targetPage) targetPage.classList.add('active');
+  
   document.getElementById('header-title').textContent = titles[p] || '';
   closeDrawer();
   renderCurrentPageContent();
@@ -318,23 +403,13 @@ function goPage(p){
   lucide.createIcons();
 }
 
-function switchBottomTab(pageId, btnElement){
-  goPage(pageId);
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('text-orange-600');
-    btn.classList.add('text-gray-500');
-  });
-  if(btnElement){
-    btnElement.classList.remove('text-gray-500');
-    btnElement.classList.add('text-orange-600');
-  }
-}
-
 function renderCurrentPageContent(){
   if(currentPage==='home') renderHome();
   if(currentPage==='tables') renderTables();
   if(currentPage==='order') renderOrderPage();
-  if(currentPage==='dashboard') renderDashboard();
+  if(currentPage==='history') renderDashboard();
+  if(currentPage==='stock') renderStock();
+  if(currentPage==='profile') renderProfile();
   if(currentPage==='admin-categories') renderAdminCategories();
   if(currentPage==='admin-products') renderAdminProducts();
   if(currentPage==='admin-addons') renderAdminAddons();
@@ -346,7 +421,7 @@ function openDrawer(){ document.getElementById('drawer').classList.add('open'); 
 function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); document.getElementById('drawer-backdrop').classList.remove('open'); }
 
 /* ============================================================
-FETCH ALL DATA
+FETCH DATA & REALTIME
 ============================================================ */
 async function fetchAll(){
   const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([
@@ -371,15 +446,17 @@ async function fetchAll(){
   state.orderItems = (oi.data || []).filter(i=>!i.cancelled);
   state.orderItemAddons = oia.data || [];
   state.shopSettings = ss.data || {shop_name:'ร้านค้าของฉัน', qr_image_url:null, logo_url:null, receipt_paper:'80mm', receipt_footer:'', auto_print:false};
-  document.getElementById('drawer-shop-name').textContent = state.shopSettings.shop_name || 'ร้านค้าของฉัน';
+  
+  const shopName = state.shopSettings.shop_name || 'ร้านค้าของฉัน';
+  document.getElementById('drawer-shop-name').textContent = shopName;
+  const pName = document.getElementById('profile-shop-name');
+  if(pName) pName.textContent = shopName;
+
   renderCurrentPageContent();
   updateCartBar();
   lucide.createIcons();
 }
 
-/* ============================================================
-REALTIME
-============================================================ */
 function setupRealtime(){
   const tablesToWatch = ['categories','products','addon_groups','addon_options','product_addon_groups','tables','orders','order_items','order_item_addons','shop_settings'];
   const channel = sb.channel('pos-realtime');
@@ -394,9 +471,6 @@ function setupRealtime(){
   });
 }
 
-/* ============================================================
-IMAGE UPLOAD HELPER
-============================================================ */
 async function uploadImageFile(file, prefix){
   const ext = (file.name.split('.').pop()||'jpg').toLowerCase();
   const path = prefix+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext;
@@ -407,7 +481,7 @@ async function uploadImageFile(file, prefix){
 }
 
 /* ============================================================
-HOME / PRODUCT GRID
+HOME PAGE
 ============================================================ */
 function renderHome(){
   const banner = document.getElementById('home-table-banner');
@@ -454,7 +528,7 @@ function renderProducts(){
     const img = p.image_url
       ? '<img src="'+p.image_url+'" class="w-full h-full object-cover">'
       : '<i data-lucide="image" class="w-8 h-8 text-orange-200"></i>';
-    return '<button onclick="onProductTap(\''+escapeHtml(p.id)+'\')" class="tap bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden text-left flex flex-col">'
+    return '<button onclick="onProductTap(\''+p.id+'\')" class="tap bg-white rounded-2xl border border-orange-100 shadow-sm overflow-hidden text-left flex flex-col">'
       + '<div class="w-full aspect-square bg-orange-50 flex items-center justify-center overflow-hidden">'+img+'</div>'
       + '<div class="p-2.5"><p class="text-xs font-bold text-gray-800 line-clamp-2">'+escapeHtml(p.name)+'</p>'
       + '<p class="text-orange-600 font-bold text-sm mt-0.5">'+money(p.price)+'</p></div></button>';
@@ -462,9 +536,8 @@ function renderProducts(){
   lucide.createIcons();
 }
 function onProductTap(productId){
-  if(!state.currentTableId){ toast('กรุณาเลือกโต๊ะก่อน'); goPage('tables'); return; }
+  if(!state.currentTableId){ toast('กรุณาเลือกโต๊ะก่อน'); switchTab('tab-tables'); return; }
   const product = state.products.find(p=>String(p.id)===String(productId));
-  if(!product) return;
   const groupIds = state.productAddonGroups.filter(x=>String(x.product_id)===String(productId)).map(x=>x.addon_group_id);
   const groups = state.addonGroups.filter(g=>groupIds.includes(g.id));
   openAddonPickModal(product, groups);
@@ -525,7 +598,7 @@ function openAddonPickModal(product, groups){
       + '<button type="button" class="stepper-btn" onclick="adjQty(1)">+</button></span>'
       + '<label class="flex items-center gap-2 text-xs font-semibold text-gray-600"><input type="checkbox" id="addon-print-input" '+(state.shopSettings && state.shopSettings.auto_print ? 'checked':'')+'> พิมพ์ออเดอร์นี้</label>'
       + '</div>'
-      + '<button onclick="confirmAddToCart(\''+escapeHtml(product.id)+'\')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">เพิ่มลงตะกร้า</button>';
+      + '<button onclick="confirmAddToCart(\''+product.id+'\')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">เพิ่มลงตะกร้า</button>';
     lucide.createIcons();
   }
   window.adjQty = (d)=>{ qty = Math.max(1, qty+d); document.getElementById('addon-qty-main').textContent = qty; };
@@ -579,7 +652,7 @@ function openAddonPickModal(product, groups){
 }
 
 /* ============================================================
-CART
+CART FUNCTIONS
 ============================================================ */
 function cartItemUnit(item){
   const addonsSum = item.addons.reduce((s,a)=>s+a.price_delta*(a.qty||1),0);
@@ -628,29 +701,6 @@ async function submitOrder(){
   goPage('order');
   if(shouldPrint) printReceipt();
 }
-async function repeatItem(orderItemId){
-  const item = state.orderItems.find(i=>i.id===orderItemId);
-  if(!item) return;
-  const addons = state.orderItemAddons.filter(a=>a.order_item_id===orderItemId);
-  const {data: oi, error} = await sb.from('order_items').insert({
-    order_id: item.order_id, product_id: item.product_id, product_name: item.product_name,
-    unit_price: item.unit_price, qty: item.qty, note: item.note, cancelled:false
-  }).select().single();
-  if(error){ toast('เกิดข้อผิดพลาด: '+error.message); return; }
-  if(addons.length){
-    await sb.from('order_item_addons').insert(addons.map(a=>({
-      order_item_id: oi.id, addon_option_id: a.addon_option_id, addon_name: a.addon_name, price_delta: a.price_delta, qty: a.qty||1
-    })));
-  }
-  toast('สั่งซ้ำแล้ว');
-  await fetchAll();
-}
-async function cancelOrderItem(orderItemId){
-  if(!confirm('ยืนยันยกเลิกรายการนี้?')) return;
-  await sb.from('order_items').update({cancelled:true}).eq('id', orderItemId);
-  toast('ยกเลิกรายการแล้ว');
-  await fetchAll();
-}
 
 /* ============================================================
 TABLES PAGE
@@ -663,11 +713,11 @@ function renderTables(){
     const total = items.reduce((s,i)=> s + itemLineTotal(i), 0);
     const busy = items.length>0;
     const statusLine = busy ? (items.length+' รายการ • '+money(total)) : 'ว่าง';
-    return '<div class="relative bg-white rounded-2xl border '+(busy?'border-orange-300':'border-orange-100')+' shadow-sm p-3 tap cursor-pointer" onclick="selectTable('+t.id+')">'
+    return '<div class="relative bg-white rounded-2xl border '+(busy?'border-orange-300 bg-orange-50/20':'border-orange-100')+' shadow-sm p-3 tap cursor-pointer" onclick="selectTable('+t.id+')">'
       + '<button onclick="event.stopPropagation(); openTableModal('+t.id+')" class="absolute top-2 right-2 p-1.5 bg-orange-50 rounded-full"><i data-lucide="pencil" class="w-3.5 h-3.5 text-gray-500"></i></button>'
       + '<p class="font-bold text-sm mt-1">'+escapeHtml(t.name)+'</p>'
-      + '<p class="text-[11px] mt-1 '+(busy?'text-orange-600 font-bold':'text-gray-400')+'">'+statusLine+'</p></div>';
-  }).join('');
+      + '<p class="text-[11px] mt-1 '+(busy?'text-orange-600 font-bold':'text-green-600')+'">'+statusLine+'</p></div>';
+  }).join('') || '<p class="col-span-full text-center text-gray-400 py-8 text-sm">ยังไม่มีโต๊ะ กด + เพิ่มโต๊ะได้เลย</p>';
   lucide.createIcons();
 }
 function itemLineTotal(item){
@@ -713,19 +763,42 @@ function renderOrderPage(){
       const addons = state.orderItemAddons.filter(a=>a.order_item_id===i.id);
       const addonsLine = addons.length ? '<p class="text-[11px] text-gray-500 mt-0.5">'+addons.map(a=>escapeHtml(a.addon_name)+(a.qty>1?(' x'+a.qty):'')).join(', ')+'</p>' : '';
       const noteLine = i.note ? '<p class="text-[11px] text-orange-500 mt-0.5 italic">โน้ต: '+escapeHtml(i.note)+'</p>' : '';
-      return '<div class="bg-white rounded-2xl border border-orange-100 p-3">'
+      return '<div class="bg-white rounded-2xl border border-orange-100 p-3 shadow-sm">'
         + '<div class="flex justify-between items-start">'
         + '<div class="min-w-0"><p class="font-bold text-sm">'+i.qty+'x '+escapeHtml(i.product_name)+'</p>'+addonsLine+noteLine+'</div>'
         + '<div class="text-right shrink-0 ml-2"><p class="font-bold text-sm text-orange-600">'+money(itemLineTotal(i))+'</p>'
         + '<div class="flex gap-2 justify-end mt-1">'
-        + '<button onclick="repeatItem(\''+escapeHtml(i.id)+'\')" class="text-[11px] font-bold text-gray-600 flex items-center gap-1 tap"><i data-lucide="repeat" class="w-3 h-3"></i>สั่งซ้ำ</button>'
-        + '<button onclick="cancelOrderItem(\''+escapeHtml(i.id)+'\')" class="text-[11px] font-bold text-red-500 flex items-center gap-1 tap"><i data-lucide="x-circle" class="w-3 h-3"></i>ยกเลิก</button>'
+        + '<button onclick="repeatItem(\''+i.id+'\')" class="text-[11px] font-bold text-gray-600 flex items-center gap-1 tap"><i data-lucide="repeat" class="w-3 h-3"></i>สั่งซ้ำ</button>'
+        + '<button onclick="cancelOrderItem(\''+i.id+'\')" class="text-[11px] font-bold text-red-500 flex items-center gap-1 tap"><i data-lucide="x-circle" class="w-3 h-3"></i>ยกเลิก</button>'
         + '</div></div></div></div>';
     }).join('');
   }
   const total = items.reduce((s,i)=>s+itemLineTotal(i),0);
   document.getElementById('order-total').textContent = money(total);
   lucide.createIcons();
+}
+async function repeatItem(orderItemId){
+  const item = state.orderItems.find(i=>i.id===orderItemId);
+  if(!item) return;
+  const addons = state.orderItemAddons.filter(a=>a.order_item_id===orderItemId);
+  const {data: oi, error} = await sb.from('order_items').insert({
+    order_id: item.order_id, product_id: item.product_id, product_name: item.product_name,
+    unit_price: item.unit_price, qty: item.qty, note: item.note, cancelled:false
+  }).select().single();
+  if(error){ toast('เกิดข้อผิดพลาด: '+error.message); return; }
+  if(addons.length){
+    await sb.from('order_item_addons').insert(addons.map(a=>({
+      order_item_id: oi.id, addon_option_id: a.addon_option_id, addon_name: a.addon_name, price_delta: a.price_delta, qty: a.qty||1
+    })));
+  }
+  toast('สั่งซ้ำแล้ว');
+  await fetchAll();
+}
+async function cancelOrderItem(orderItemId){
+  if(!confirm('ยืนยันยกเลิกรายการนี้?')) return;
+  await sb.from('order_items').update({cancelled:true}).eq('id', orderItemId);
+  toast('ยกเลิกรายการแล้ว');
+  await fetchAll();
 }
 async function closeBill(){
   const order = state.openOrders.find(o=>o.table_id===state.currentTableId);
@@ -737,7 +810,7 @@ async function closeBill(){
   await sb.from('orders').update({status:'paid', total, closed_at:new Date().toISOString()}).eq('id', order.id);
   toast('ปิดบิลเรียบร้อย');
   await fetchAll();
-  goPage('tables');
+  switchTab('tab-tables');
 }
 async function voidBill(){
   const order = state.openOrders.find(o=>o.table_id===state.currentTableId);
@@ -746,7 +819,7 @@ async function voidBill(){
   await sb.from('orders').update({status:'voided', closed_at:new Date().toISOString()}).eq('id', order.id);
   toast('ยกเลิกบิลแล้ว');
   await fetchAll();
-  goPage('tables');
+  switchTab('tab-tables');
 }
 
 /* ============================================================
@@ -783,7 +856,7 @@ function printReceipt(){
 }
 
 /* ============================================================
-DASHBOARD
+HISTORY / DASHBOARD
 ============================================================ */
 let chartInstance = null;
 document.addEventListener('click', e=>{
@@ -821,7 +894,7 @@ async function renderDashboard(){
   document.getElementById('stat-orders').textContent = orders.length;
   document.getElementById('stat-avg').textContent = money(orders.length?Math.round(grandTotal/orders.length):0);
   const ctx = document.getElementById('sales-chart');
-  if(chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  if(chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
     type:'bar',
     data:{ labels: buckets.map(b=>b.label), datasets:[{ label:'ยอดขาย (฿)', data: buckets.map(b=>b.total), backgroundColor:'#f97316', borderRadius:6 }] },
@@ -830,16 +903,43 @@ async function renderDashboard(){
 }
 
 /* ============================================================
-GENERIC MODAL
+STOCK PAGE
+============================================================ */
+function renderStock(){
+  const list = document.getElementById('stock-products-list');
+  list.innerHTML = state.products.map(p=>{
+    const cat = state.categories.find(c=>c.id===p.category_id);
+    const img = p.image_url ? '<img src="'+p.image_url+'" class="w-full h-full object-cover">' : '<i data-lucide="image" class="w-5 h-5 text-orange-200"></i>';
+    return '<div class="bg-white rounded-2xl border border-orange-100 p-3 flex items-center gap-3 shadow-sm">'
+      + '<div class="w-12 h-12 rounded-xl bg-orange-50 overflow-hidden flex items-center justify-center shrink-0">'+img+'</div>'
+      + '<div class="min-w-0 flex-1"><p class="text-sm font-bold text-gray-800 truncate">'+escapeHtml(p.name)+'</p>'
+      + '<p class="text-xs text-orange-600 font-semibold">'+money(p.price)+' <span class="text-gray-400 font-normal">('+(cat?escapeHtml(cat.name):'ไม่มีหมวดหมู่')+')</span></p></div>'
+      + '<div class="flex gap-2 shrink-0">'
+      + '<button onclick="openProductModal(\''+p.id+'\')" class="p-2 bg-orange-50 text-orange-600 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4"></i></button>'
+      + '</div></div>';
+  }).join('') || '<p class="text-center text-gray-400 text-sm py-10">ยังไม่มีรายการสินค้า</p>';
+  lucide.createIcons();
+}
+
+/* ============================================================
+PROFILE PAGE
+============================================================ */
+function renderProfile(){
+  const ss = state.shopSettings || {};
+  document.getElementById('profile-shop-name').textContent = ss.shop_name || 'ร้านค้าของฉัน';
+}
+
+/* ============================================================
+MODAL HELPER & ADMIN MODALS
 ============================================================ */
 function showGenericModal(){ document.getElementById('generic-modal-backdrop').classList.remove('hidden'); }
 function closeGenericModal(){ document.getElementById('generic-modal-backdrop').classList.add('hidden'); }
 
-/* ---------- Categories admin ---------- */
+/* ---------- Categories Admin ---------- */
 function renderAdminCategories(){
   const list = document.getElementById('admin-categories-list');
   list.innerHTML = state.categories.map(c=>
-    '<div class="bg-white rounded-xl border border-orange-100 p-3 flex justify-between items-center">'
+    '<div class="bg-white rounded-xl border border-orange-100 p-3 flex justify-between items-center shadow-sm">'
     + '<span class="text-sm font-semibold">'+escapeHtml(c.name)+'</span>'
     + '<div class="flex gap-2">'
     + '<button onclick="openCategoryModal('+c.id+')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button>'
@@ -866,19 +966,19 @@ async function saveCategory(id){
   closeGenericModal(); await fetchAll();
 }
 
-/* ---------- Products admin ---------- */
+/* ---------- Products Admin ---------- */
 function renderAdminProducts(){
   const list = document.getElementById('admin-products-list');
   list.innerHTML = state.products.map(p=>{
     const cat = state.categories.find(c=>c.id===p.category_id);
     const img = p.image_url ? '<img src="'+p.image_url+'" class="w-full h-full object-cover">' : '<i data-lucide="image" class="w-5 h-5 text-orange-200"></i>';
-    return '<div class="bg-white rounded-xl border border-orange-100 p-3 flex items-center gap-3">'
+    return '<div class="bg-white rounded-xl border border-orange-100 p-3 flex items-center gap-3 shadow-sm">'
       + '<div class="w-12 h-12 rounded-lg bg-orange-50 overflow-hidden flex items-center justify-center shrink-0">'+img+'</div>'
       + '<div class="min-w-0 flex-1"><p class="text-sm font-bold truncate">'+escapeHtml(p.name)+'</p>'
       + '<p class="text-[11px] text-gray-400">'+(cat?escapeHtml(cat.name):'ไม่มีหมวดหมู่')+' • '+money(p.price)+(p.active===false?' • ปิดการขาย':'')+'</p></div>'
       + '<div class="flex gap-2 shrink-0">'
-      + '<button onclick="openProductModal(\''+escapeHtml(p.id)+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button>'
-      + '<button onclick="deleteRow(\'products\',\''+escapeHtml(p.id)+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button>'
+      + '<button onclick="openProductModal(\''+p.id+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button>'
+      + '<button onclick="deleteRow(\'products\',\''+p.id+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button>'
       + '</div></div>';
   }).join('') || '<p class="text-center text-gray-400 text-sm py-6">ยังไม่มีสินค้า</p>';
   lucide.createIcons();
@@ -895,7 +995,7 @@ function openProductModal(id){
     '<div class="flex items-center justify-between mb-3"><h3 class="font-bold text-lg">'+(p?'แก้ไขสินค้า':'เพิ่มสินค้า')+'</h3>'
     + '<button onclick="closeGenericModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div>'
     + '<div class="space-y-3">'
-    + '<div><label class="text-xs font-bold text-gray-500">รูปเมนู (เลือกรูปจากเครื่องได้เลย)</label>'
+    + '<div><label class="text-xs font-bold text-gray-500">รูปเมนู</label>'
     + '<div class="flex items-center gap-3 mt-1">'
     + '<div class="w-16 h-16 rounded-xl bg-orange-50 overflow-hidden flex items-center justify-center">'
     + '<img id="prod-img-preview" src="'+imgSrc+'" class="w-full h-full object-cover '+(imgSrc?'':'hidden')+'">'
@@ -907,11 +1007,11 @@ function openProductModal(id){
     + '<input type="number" id="prod-price-input" value="'+(p?p.price:'')+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"></div>'
     + '<div><label class="text-xs font-bold text-gray-500">หมวดหมู่</label>'
     + '<select id="prod-cat-input" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"><option value="">— ไม่มี —</option>'+catOptions+'</select></div>'
-    + '<div><label class="text-xs font-bold text-gray-500 flex items-center gap-2"><input type="checkbox" id="prod-active-input" '+(p ? (p.active !== false ? 'checked' : '') : 'checked')+'> เปิดขายสินค้านี้</label></div>'
+    + '<div><label class="text-xs font-bold text-gray-500 flex items-center gap-2"><input type="checkbox" id="prod-active-input" '+(!p||p.active!==false?'checked':'')+'> เปิดขายสินค้านี้</label></div>'
     + '<div><label class="text-xs font-bold text-gray-500">ตัวเลือกเสริมที่ใช้กับเมนูนี้</label>'
     + '<div class="flex flex-col gap-1 mt-1">'+addonChecks+'</div></div>'
     + '</div>'
-    + '<button onclick="saveProduct('+(id?('\''+escapeHtml(id)+'\''):'null')+')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">บันทึก</button>';
+    + '<button onclick="saveProduct('+(id?('\''+id+'\''):'null')+')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">บันทึก</button>';
   showGenericModal(); lucide.createIcons();
   document.getElementById('prod-img-input').onchange = function(){
     const f = this.files[0]; if(!f) return;
@@ -951,13 +1051,13 @@ async function saveProduct(id){
   toast('บันทึกสินค้าแล้ว');
 }
 
-/* ---------- Addon groups admin ---------- */
+/* ---------- Addon Groups Admin ---------- */
 function renderAdminAddons(){
   const list = document.getElementById('admin-addons-list');
   list.innerHTML = state.addonGroups.map(g=>{
     const opts = state.addonOptions.filter(o=>o.group_id===g.id);
-    const optChips = opts.map(o=>'<span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-1 rounded-full">'+escapeHtml(o.name)+(o.price_delta?(' '+(o.price_delta>0?'+':'')+money(o.price_delta)):'')+(o.allow_qty?' (ปรับจำนวนได้)':'')+'</span>').join('');
-    return '<div class="bg-white rounded-xl border border-orange-100 p-3">'
+    const optChips = opts.map(o=>'<span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-1 rounded-full">'+escapeHtml(o.name)+(o.price_delta?(' '+(o.price_delta>0?'+':'')+money(o.price_delta)):'')+'</span>').join('');
+    return '<div class="bg-white rounded-xl border border-orange-100 p-3 shadow-sm">'
       + '<div class="flex justify-between items-center"><div>'
       + '<p class="text-sm font-bold">'+escapeHtml(g.name)+'</p>'
       + '<p class="text-[11px] text-gray-400">เลือกได้สูงสุด '+g.max_select+' • '+(g.min_select>0?('บังคับเลือกอย่างน้อย '+g.min_select):'ไม่บังคับ')+'</p></div>'
@@ -973,21 +1073,19 @@ function renderOptsList(){
   return localAddonOptions.map((o,idx)=>
     '<div class="border border-orange-100 rounded-lg p-2 space-y-1.5" data-idx="'+idx+'">'
     + '<div class="flex gap-2 items-center">'
-    + '<input class="opt-name-input flex-1 border border-orange-100 rounded-lg px-2 py-1.5 text-sm" placeholder="ชื่อตัวเลือก เช่น ไข่ดาว" value="'+escapeHtml(o.name)+'" onchange="localOptEdit('+idx+',\'name\',this.value)">'
+    + '<input class="opt-name-input flex-1 border border-orange-100 rounded-lg px-2 py-1.5 text-sm" placeholder="ชื่อ เช่น ไข่ดาว" value="'+escapeHtml(o.name)+'" onchange="localOptEdit('+idx+',\'name\',this.value)">'
     + '<input type="number" class="opt-price-input w-20 border border-orange-100 rounded-lg px-2 py-1.5 text-sm" placeholder="ราคา" value="'+(o.price_delta||0)+'" onchange="localOptEdit('+idx+',\'price_delta\',this.value)">'
     + '<button onclick="localOptRemove('+idx+')" class="p-1.5 text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>'
     + '</div>'
     + '<label class="flex items-center gap-2 text-[11px] text-gray-500">'
-    + '<input type="checkbox" class="opt-allowqty-input" '+(o.allow_qty?'checked':'')+' onchange="localOptEdit('+idx+',\'allow_qty\',this.checked)"> อนุญาตให้เพิ่ม/ลดจำนวน'
-    + (o.allow_qty ? ' &nbsp; จำนวนสูงสุด <input type="number" class="opt-maxqty-input w-14 border border-orange-100 rounded px-1 py-0.5" value="'+(o.max_qty||5)+'" onchange="localOptEdit('+idx+',\'max_qty\',this.value)">' : '')
+    + '<input type="checkbox" class="opt-allowqty-input" '+(o.allow_qty?'checked':'')+' onchange="localOptEdit('+idx+',\'allow_qty\',this.checked)"> อนุญาตให้ปรับจำนวนได้'
     + '</label></div>'
   ).join('');
 }
 window.localOptEdit = (idx, field, val)=>{
-  if(field==='price_delta' || field==='max_qty') localAddonOptions[idx][field] = Number(val);
+  if(field==='price_delta') localAddonOptions[idx][field] = Number(val);
   else if(field==='allow_qty') localAddonOptions[idx][field] = !!val;
   else localAddonOptions[idx][field] = val;
-  if(field==='allow_qty'){ document.getElementById('opts-list').innerHTML = renderOptsList(); lucide.createIcons(); }
 };
 window.localOptRemove = (idx)=>{ localAddonOptions.splice(idx,1); document.getElementById('opts-list').innerHTML = renderOptsList(); lucide.createIcons(); };
 window.localOptAdd = ()=>{ localAddonOptions.push({name:'', price_delta:0, allow_qty:false, max_qty:5}); document.getElementById('opts-list').innerHTML = renderOptsList(); lucide.createIcons(); };
@@ -1002,7 +1100,7 @@ function openAddonGroupModal(id){
     + '<div><label class="text-xs font-bold text-gray-500">ชื่อกลุ่ม เช่น ท็อปปิ้ง, เครื่องเคียง</label>'
     + '<input id="ag-name-input" value="'+(g?escapeHtml(g.name):'')+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"></div>'
     + '<div class="grid grid-cols-2 gap-2">'
-    + '<div><label class="text-xs font-bold text-gray-500">เลือกได้สูงสุด (ชิ้น/อย่าง)</label>'
+    + '<div><label class="text-xs font-bold text-gray-500">เลือกได้สูงสุด</label>'
     + '<input type="number" min="1" id="ag-max-input" value="'+(g?g.max_select:1)+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"></div>'
     + '<div><label class="text-xs font-bold text-gray-500">บังคับเลือกอย่างน้อย</label>'
     + '<input type="number" min="0" id="ag-min-input" value="'+(g?g.min_select:0)+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"></div>'
@@ -1028,14 +1126,14 @@ async function saveAddonGroup(id){
     .map((o,idx)=>({group_id: groupId, name:o.name.trim(), price_delta:Number(o.price_delta||0), allow_qty: !!o.allow_qty, max_qty: Number(o.max_qty||5), sort_order: idx}));
   if(toInsert.length) await sb.from('addon_options').insert(toInsert);
   closeGenericModal(); await fetchAll();
-  toast('บันทึกกลุ่มตัวเลือกเสริมแล้ว');
+  toast('บันทึกเรียบร้อย');
 }
 
-/* ---------- Tables admin ---------- */
+/* ---------- Tables Admin ---------- */
 function renderAdminTables(){
   const list = document.getElementById('admin-tables-list');
   list.innerHTML = state.tablesList.map(t=>
-    '<div class="bg-white rounded-xl border border-orange-100 p-3 flex justify-between items-center">'
+    '<div class="bg-white rounded-xl border border-orange-100 p-3 flex justify-between items-center shadow-sm">'
     + '<span class="text-sm font-semibold">'+escapeHtml(t.name)+'</span>'
     + '<div class="flex gap-2">'
     + '<button onclick="openTableModal('+t.id+')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button>'
@@ -1062,7 +1160,7 @@ async function saveTable(id){
   closeGenericModal(); await fetchAll();
 }
 
-/* ---------- Shop / QR / bill settings admin ---------- */
+/* ---------- Shop / QR / Bill Settings Admin ---------- */
 function renderAdminShop(){
   const ss = state.shopSettings || {};
   document.getElementById('shop-name-input').value = ss.shop_name || '';
@@ -1101,14 +1199,10 @@ async function saveBillSettings(){
   toast('บันทึกการตั้งค่าบิลแล้ว'); await fetchAll();
 }
 
-/* ---------- generic delete ---------- */
 async function deleteRow(table, id){
   if(!confirm('ยืนยันการลบ?')) return;
   const {error} = await sb.from(table).delete().eq('id', id);
-  if(error){ 
-    toast('ลบไม่สำเร็จ: ' + (error.code === '23503' ? 'รายการนี้ถูกใช้งานอยู่ ไม่สามารถลบได้' : error.message)); 
-    return; 
-  }
+  if(error){ toast('ลบไม่สำเร็จ: '+error.message); return; }
   await fetchAll();
 }
 
@@ -1118,7 +1212,7 @@ INIT
 (async function init(){
   await fetchAll();
   setupRealtime();
-  goPage('home');
+  switchTab('tab-home');
 })();
 </script>
 </body>
