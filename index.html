@@ -597,18 +597,18 @@ function openAddonPickModal(product, groups){
       const picked = selections[g.id][o.id] || 0;
       const priceLabel = o.price_delta ? (o.price_delta>0?'+':'') + money(o.price_delta) : '';
       if(o.allow_qty){
-        return '<div class="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg'+(picked>0?' bg-orange-50':'')+'">'
-          + '<span>'+escapeHtml(o.name)+' <span class="text-orange-500 font-semibold">'+priceLabel+'</span></span>'
+        return '<div class="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg' + (picked>0?' bg-orange-50':'') + '">'
+          + '<span>' + escapeHtml(o.name) + ' <span class="text-orange-500 font-semibold">' + priceLabel + '</span></span>'
           + '<span class="flex items-center gap-2">'
-          + '<button type="button" class="stepper-btn" onclick="addonQtyChange('+g.id+','+o.id+',-1)">-</button>'
-          + '<span class="w-5 text-center font-bold" id="addon-qty-'+g.id+'-'+o.id+'">'+picked+'</span>'
-          + '<button type="button" class="stepper-btn" onclick="addonQtyChange('+g.id+','+o.id+',1)">+</button>'
+          + '<button type="button" class="stepper-btn" onclick="addonQtyChange(' + g.id + ',' + o.id + ',-1)">-</button>'
+          + '<span class="w-5 text-center font-bold" id="addon-qty-' + g.id + '-' + o.id + '">' + picked + '</span>'
+          + '<button type="button" class="stepper-btn" onclick="addonQtyChange(' + g.id + ',' + o.id + ',1)">+</button>'
           + '</span></div>';
       }
       const checked = picked>0 ? 'checked' : '';
-      return '<label class="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg'+(picked>0?' bg-orange-50':'')+'">'
-        + '<span class="flex items-center gap-2"><input type="checkbox" '+checked+' onchange="addonToggle('+g.id+','+o.id+','+g.max_select+', this.checked)"> '+escapeHtml(o.name)+'</span>'
-        + '<span class="text-orange-500 font-semibold">'+priceLabel+'</span></label>';
+      return '<label class="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg' + (picked>0?' bg-orange-50':'') + '">'
+        + '<span class="flex items-center gap-2"><input type="checkbox" ' + checked + ' onchange="addonToggle(' + g.id + ',' + o.id + ',' + g.max_select + ', this.checked)"> ' + escapeHtml(o.name) + '</span>'
+        + '<span class="text-orange-500 font-semibold">' + priceLabel + '</span></label>';
     }).join('');
   }
   function groupsHtml(){
