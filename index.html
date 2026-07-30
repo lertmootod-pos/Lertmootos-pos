@@ -457,11 +457,16 @@ async function fetchAll(){
   lucide.createIcons();
 }
 
+let _realtimeFetchTimer = null;
+function debouncedFetchAll(){
+  if(_realtimeFetchTimer) clearTimeout(_realtimeFetchTimer);
+  _realtimeFetchTimer = setTimeout(()=>{ _realtimeFetchTimer = null; fetchAll(); }, 400);
+}
 function setupRealtime(){
   const tablesToWatch = ['categories','products','addon_groups','addon_options','product_addon_groups','tables','orders','order_items','order_item_addons','shop_settings'];
   const channel = sb.channel('pos-realtime');
   tablesToWatch.forEach(t=>{
-    channel.on('postgres_changes', {event:'*', schema:'public', table:t}, ()=>{ fetchAll(); });
+    channel.on('postgres_changes', {event:'*', schema:'public', table:t}, ()=>{ debouncedFetchAll(); });
   });
   channel.subscribe(status=>{
     const dot = document.getElementById('realtime-dot');
