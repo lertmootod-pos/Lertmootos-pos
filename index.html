@@ -424,30 +424,42 @@ function closeDrawer(){ document.getElementById('drawer').classList.remove('open
 FETCH DATA & REALTIME
 ============================================================ */
 async function fetchAll(){
-  const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([
-    sb.from('categories').select('*').order('sort_order'),
-    sb.from('products').select('*').order('sort_order'),
-    sb.from('addon_groups').select('*').order('id'),
-    sb.from('addon_options').select('*').order('sort_order'),
-    sb.from('product_addon_groups').select('*'),
-    sb.from('tables').select('*').order('sort_order'),
-    sb.from('orders').select('*').eq('status','open'),
-    sb.from('order_items').select('*').order('created_at'),
-    sb.from('order_item_addons').select('*'),
-    sb.from('shop_settings').select('*').eq('id',1).maybeSingle()
-  ]);
-  state.categories = cat.data || [];
-  state.products = prod.data || [];
-  state.addonGroups = ag.data || [];
-  state.addonOptions = ao.data || [];
-  state.productAddonGroups = pag.data || [];
-  state.tablesList = tbl.data || [];
-  state.openOrders = ord.data || [];
-  state.orderItems = (oi.data || []).filter(i=>!i.cancelled);
-  state.orderItemAddons = oia.data || [];
-  state.shopSettings = ss.data || {shop_name:'ร้านค้าของฉัน', qr_image_url:null, logo_url:null, receipt_paper:'80mm', receipt_footer:'', auto_print:false};
-  
-  const shopName = state.shopSettings.shop_name || 'ร้านค้าของฉัน';
+  try {
+    const catRes = await sb.from('categories').select('*').order('sort_order');
+    state.categories = catRes.data || [];
+
+    const prodRes = await sb.from('products').select('*').order('sort_order');
+    state.products = prodRes.data || [];
+
+    const agRes = await sb.from('addon_groups').select('*').order('id');
+    state.addonGroups = agRes.data || [];
+
+    const aoRes = await sb.from('addon_options').select('*').order('sort_order');
+    state.addonOptions = aoRes.data || [];
+
+    const pagRes = await sb.from('product_addon_groups').select('*');
+    state.productAddonGroups = pagRes.data || [];
+
+    const tblRes = await sb.from('tables').select('*').order('sort_order');
+    state.tablesList = tblRes.data || [];
+
+    const ordRes = await sb.from('orders').select('*').eq('status','open');
+    state.openOrders = ordRes.data || [];
+
+    const oiRes = await sb.from('order_items').select('*').order('created_at');
+    state.orderItems = (oiRes.data || []).filter(i => i.cancelled !== true);
+
+    const oiaRes = await sb.from('order_item_addons').select('*');
+    state.orderItemAddons = oiaRes.data || [];
+
+    const ssRes = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+    state.shopSettings = ssRes.data || {shop_name:'ร้านค้าของฉัน', qr_image_url:null, logo_url:null, receipt_paper:'80mm', receipt_footer:'', auto_print:false};
+
+  } catch(err) {
+    console.error("Fetch All Error:", err);
+  }
+
+  const shopName = state.shopSettings ? (state.shopSettings.shop_name || 'ร้านค้าของฉัน') : 'ร้านค้าของฉัน';
   document.getElementById('drawer-shop-name').textContent = shopName;
   const pName = document.getElementById('profile-shop-name');
   if(pName) pName.textContent = shopName;
@@ -487,7 +499,7 @@ function renderHome(){
   const banner = document.getElementById('home-table-banner');
   const noTable = document.getElementById('home-no-table');
   if(state.currentTableId){
-    const t = state.tablesList.find(x=>String(x.id)===String(state.currentTableId));
+    const t = state.tablesList.find(x => String(x.id) === String(state.currentTableId));
     banner.classList.remove('hidden'); noTable.classList.add('hidden');
     document.getElementById('home-table-label').textContent = 'กำลังสั่งให้: ' + (t?t.name:'-');
   } else {
@@ -671,56 +683,41 @@ function updateCartBar(){
     bar.classList.add('hidden');
   }
 }
-
-/* FIX: SUBMIT ORDER & SAVE TO DB CORRECTLY */
 async function submitOrder(){
   if(!state.currentTableId || state.cart.length===0) return;
   
-  // ค้นหา Open Order โดยเปรียบเทียบ ID เป็น String กันความผิดพลาด
+  // ค้นหา Order เปิดอยู่ของโต๊ะปัจจุบัน (เปรียบเทียบแบบ String)
   let order = state.openOrders.find(o => String(o.table_id) === String(state.currentTableId));
   
   if(!order){
     const {data, error} = await sb.from('orders').insert({table_id: state.currentTableId, status:'open', total:0}).select().single();
-    if(error){ toast('เกิดข้อผิดพลาดในการสร้างออเดอร์: '+error.message); return; }
+    if(error){ toast('เกิดข้อผิดพลาดในการสร้างบิล: '+error.message); return; }
     order = data;
   }
-  
+
   const submittedItems = [];
   for(const item of state.cart){
     const {data: oi, error} = await sb.from('order_items').insert({
-      order_id: order.id, 
-      product_id: item.product_id, 
-      product_name: item.product_name,
-      unit_price: item.unit_price, 
-      qty: item.qty, 
-      note: item.note || null, 
-      cancelled: false
+      order_id: order.id, product_id: item.product_id, product_name: item.product_name,
+      unit_price: item.unit_price, qty: item.qty, note: item.note || null, cancelled:false
     }).select().single();
-    
-    if(error){ toast('เกิดข้อผิดพลาดบันทึกเมนู: '+error.message); continue; }
-    
-    if(item.addons.length){
+
+    if(error){ toast('เกิดข้อผิดพลาดลงรายการ: '+error.message); continue; }
+
+    if(item.addons && item.addons.length){
       await sb.from('order_item_addons').insert(item.addons.map(a=>({
-        order_item_id: oi.id, 
-        addon_option_id: a.option_id, 
-        addon_name: a.name, 
-        price_delta: a.price_delta, 
-        qty: a.qty||1
+        order_item_id: oi.id, addon_option_id: a.option_id, addon_name: a.name, price_delta: a.price_delta, qty: a.qty||1
       })));
     }
-    submittedItems.push({item, addons: item.addons, doPrint: item.print});
+    submittedItems.push({item, addons: item.addons});
+    if(item.print) submittedItems[submittedItems.length-1].doPrint = true;
   }
-  
-  const targetTableId = state.currentTableId;
+
   const shouldPrint = submittedItems.some(x=>x.doPrint);
-  
   state.cart = [];
   await fetchAll();
   
-  state.currentTableId = targetTableId;
   goPage('order');
-  
-  toast('ส่งรายการเข้าโต๊ะสำเร็จ');
   if(shouldPrint) printReceipt();
 }
 
@@ -730,8 +727,8 @@ TABLES PAGE
 function renderTables(){
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = state.tablesList.map(t=>{
-    const order = state.openOrders.find(o=>String(o.table_id)===String(t.id));
-    const items = order ? state.orderItems.filter(i=>String(i.order_id)===String(order.id)) : [];
+    const order = state.openOrders.find(o => String(o.table_id) === String(t.id));
+    const items = order ? state.orderItems.filter(i => String(i.order_id) === String(order.id)) : [];
     const total = items.reduce((s,i)=> s + itemLineTotal(i), 0);
     const busy = items.length>0;
     const statusLine = busy ? (items.length+' รายการ • '+money(total)) : 'ว่าง';
@@ -743,7 +740,7 @@ function renderTables(){
   lucide.createIcons();
 }
 function itemLineTotal(item){
-  const addonsSum = state.orderItemAddons.filter(a=>String(a.order_item_id)===String(item.id)).reduce((s,a)=>s+Number(a.price_delta)*(a.qty||1),0);
+  const addonsSum = state.orderItemAddons.filter(a => String(a.order_item_id) === String(item.id)).reduce((s,a)=>s+Number(a.price_delta)*(a.qty||1),0);
   return (Number(item.unit_price) + addonsSum) * item.qty;
 }
 function selectTable(tableId){
@@ -755,16 +752,16 @@ function selectTable(tableId){
 ORDER DETAIL PAGE
 ============================================================ */
 function renderOrderPage(){
-  const t = state.tablesList.find(x=>String(x.id)===String(state.currentTableId));
+  const t = state.tablesList.find(x => String(x.id) === String(state.currentTableId));
   document.getElementById('order-table-name').textContent = t ? t.name : 'ยังไม่ได้เลือกโต๊ะ';
   
-  const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
+  const order = state.openOrders.find(o => String(o.table_id) === String(state.currentTableId));
   const list = document.getElementById('order-items-list');
   const empty = document.getElementById('order-empty');
   const closeBtn = document.getElementById('order-close-btn');
   const voidBtn = document.getElementById('order-void-btn');
   const printBtn = document.getElementById('order-print-btn');
-  
+
   if(!order){
     list.innerHTML='';
     empty.classList.remove('hidden');
@@ -775,25 +772,24 @@ function renderOrderPage(){
     printBtn.classList.add('hidden');
     return;
   }
-  
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+
+  const items = state.orderItems.filter(i => String(i.order_id) === String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   
   if(items.length===0){ 
     list.innerHTML=''; 
     empty.classList.remove('hidden'); 
-    document.getElementById('order-status-label').textContent = 'ยังไม่มีออเดอร์';
+    document.getElementById('order-status-label').textContent = 'ยังไม่มีรายการสั่ง';
     closeBtn.classList.add('hidden');
     voidBtn.classList.add('hidden');
     printBtn.classList.add('hidden');
   } else {
-    empty.classList.add('hidden');
     document.getElementById('order-status-label').textContent = 'เปิดออเดอร์ • '+items.length+' รายการ';
     closeBtn.classList.remove('hidden');
     voidBtn.classList.remove('hidden');
     printBtn.classList.remove('hidden');
-    
+    empty.classList.add('hidden');
     list.innerHTML = items.map(i=>{
-      const addons = state.orderItemAddons.filter(a=>String(a.order_item_id)===String(i.id));
+      const addons = state.orderItemAddons.filter(a => String(a.order_item_id) === String(i.id));
       const addonsLine = addons.length ? '<p class="text-[11px] text-gray-500 mt-0.5">'+addons.map(a=>escapeHtml(a.addon_name)+(a.qty>1?(' x'+a.qty):'')).join(', ')+'</p>' : '';
       const noteLine = i.note ? '<p class="text-[11px] text-orange-500 mt-0.5 italic">โน้ต: '+escapeHtml(i.note)+'</p>' : '';
       return '<div class="bg-white rounded-2xl border border-orange-100 p-3 shadow-sm">'
@@ -828,16 +824,18 @@ async function repeatItem(orderItemId){
   toast('สั่งซ้ำแล้ว');
   await fetchAll();
 }
+
 async function cancelOrderItem(orderItemId){
   if(!confirm('ยืนยันยกเลิกรายการนี้?')) return;
   await sb.from('order_items').update({cancelled:true}).eq('id', orderItemId);
   toast('ยกเลิกรายการแล้ว');
   await fetchAll();
 }
+
 async function closeBill(){
-  const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
+  const order = state.openOrders.find(o => String(o.table_id) === String(state.currentTableId));
   if(!order) return;
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id));
+  const items = state.orderItems.filter(i => String(i.order_id) === String(order.id));
   const total = items.reduce((s,i)=>s+itemLineTotal(i),0);
   if(items.length===0){ toast('ยังไม่มีรายการสั่ง'); return; }
   if(!confirm('ยืนยันปิดบิลยอด '+money(total)+' ?')) return;
@@ -846,8 +844,9 @@ async function closeBill(){
   await fetchAll();
   switchTab('tab-tables');
 }
+
 async function voidBill(){
-  const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
+  const order = state.openOrders.find(o => String(o.table_id) === String(state.currentTableId));
   if(!order) return;
   if(!confirm('ยืนยันยกเลิกบิลนี้ทั้งหมด? รายการทั้งหมดจะถูกยกเลิก')) return;
   await sb.from('orders').update({status:'voided', closed_at:new Date().toISOString()}).eq('id', order.id);
@@ -860,16 +859,16 @@ async function voidBill(){
 PRINT RECEIPT
 ============================================================ */
 function printReceipt(){
-  const order = state.openOrders.find(o=>String(o.table_id)===String(state.currentTableId));
-  const t = state.tablesList.find(x=>String(x.id)===String(state.currentTableId));
+  const order = state.openOrders.find(o => String(o.table_id) === String(state.currentTableId));
+  const t = state.tablesList.find(x => String(x.id) === String(state.currentTableId));
   if(!order){ toast('ยังไม่มีออเดอร์ให้พิมพ์'); return; }
-  const items = state.orderItems.filter(i=>String(i.order_id)===String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  const items = state.orderItems.filter(i => String(i.order_id) === String(order.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
   const ss = state.shopSettings || {};
   const paper = ss.receipt_paper || '80mm';
   const widthPx = paper==='58mm' ? '220px' : paper==='a5' ? '420px' : '300px';
   const logo = ss.logo_url ? '<img src="'+ss.logo_url+'" style="max-width:80px;max-height:80px;margin:0 auto 8px;display:block;">' : '';
   const rows = items.map(i=>{
-    const addons = state.orderItemAddons.filter(a=>String(a.order_item_id)===String(i.id));
+    const addons = state.orderItemAddons.filter(a => String(a.order_item_id) === String(i.id));
     const addonsLine = addons.map(a=>'&nbsp;&nbsp;+ '+escapeHtml(a.addon_name)+(a.qty>1?(' x'+a.qty):'')).join('<br>');
     return '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px;">'
       + '<span>'+i.qty+'x '+escapeHtml(i.product_name)+'</span><span>'+money(itemLineTotal(i))+'</span></div>'
@@ -942,7 +941,7 @@ STOCK PAGE
 function renderStock(){
   const list = document.getElementById('stock-products-list');
   list.innerHTML = state.products.map(p=>{
-    const cat = state.categories.find(c=>String(c.id)===String(p.category_id));
+    const cat = state.categories.find(c=>c.id===p.category_id);
     const img = p.image_url ? '<img src="'+p.image_url+'" class="w-full h-full object-cover">' : '<i data-lucide="image" class="w-5 h-5 text-orange-200"></i>';
     return '<div class="bg-white rounded-2xl border border-orange-100 p-3 flex items-center gap-3 shadow-sm">'
       + '<div class="w-12 h-12 rounded-xl bg-orange-50 overflow-hidden flex items-center justify-center shrink-0">'+img+'</div>'
@@ -1004,7 +1003,7 @@ async function saveCategory(id){
 function renderAdminProducts(){
   const list = document.getElementById('admin-products-list');
   list.innerHTML = state.products.map(p=>{
-    const cat = state.categories.find(c=>String(c.id)===String(p.category_id));
+    const cat = state.categories.find(c=>c.id===p.category_id);
     const img = p.image_url ? '<img src="'+p.image_url+'" class="w-full h-full object-cover">' : '<i data-lucide="image" class="w-5 h-5 text-orange-200"></i>';
     return '<div class="bg-white rounded-xl border border-orange-100 p-3 flex items-center gap-3 shadow-sm">'
       + '<div class="w-12 h-12 rounded-lg bg-orange-50 overflow-hidden flex items-center justify-center shrink-0">'+img+'</div>'
@@ -1019,10 +1018,10 @@ function renderAdminProducts(){
 }
 function openProductModal(id){
   const p = id ? state.products.find(x=>String(x.id)===String(id)) : null;
-  const assignedGroups = id ? state.productAddonGroups.filter(x=>String(x.product_id)===String(id)).map(x=>String(x.addon_group_id)) : [];
-  const catOptions = state.categories.map(c=>'<option value="'+c.id+'" '+(p&&String(p.category_id)===String(c.id)?'selected':'')+'>'+escapeHtml(c.name)+'</option>').join('');
+  const assignedGroups = id ? state.productAddonGroups.filter(x=>String(x.product_id)===String(id)).map(x=>x.addon_group_id) : [];
+  const catOptions = state.categories.map(c=>'<option value="'+c.id+'" '+(p&&p.category_id===c.id?'selected':'')+'>'+escapeHtml(c.name)+'</option>').join('');
   const addonChecks = state.addonGroups.map(g=>
-    '<label class="flex items-center gap-2 text-sm py-1"><input type="checkbox" class="prod-addon-cb" value="'+g.id+'" '+(assignedGroups.includes(String(g.id))?'checked':'')+'> '+escapeHtml(g.name)+'</label>'
+    '<label class="flex items-center gap-2 text-sm py-1"><input type="checkbox" class="prod-addon-cb" value="'+g.id+'" '+(assignedGroups.includes(g.id)?'checked':'')+'> '+escapeHtml(g.name)+'</label>'
   ).join('') || '<p class="text-xs text-gray-400">ยังไม่มีกลุ่มตัวเลือกเสริม สร้างได้ที่เมนู "ตัวเลือกเสริม"</p>';
   const imgSrc = p&&p.image_url ? p.image_url : '';
   document.getElementById('generic-modal-body').innerHTML =
@@ -1076,7 +1075,7 @@ async function saveProduct(id){
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
     productId = data.id;
   }
-  const selectedGroupIds = Array.from(document.querySelectorAll('.prod-addon-cb:checked')).map(cb=>cb.value);
+  const selectedGroupIds = Array.from(document.querySelectorAll('.prod-addon-cb:checked')).map(cb=>Number(cb.value));
   await sb.from('product_addon_groups').delete().eq('product_id', productId);
   if(selectedGroupIds.length){
     await sb.from('product_addon_groups').insert(selectedGroupIds.map(gid=>({product_id: productId, addon_group_id: gid})));
@@ -1089,7 +1088,7 @@ async function saveProduct(id){
 function renderAdminAddons(){
   const list = document.getElementById('admin-addons-list');
   list.innerHTML = state.addonGroups.map(g=>{
-    const opts = state.addonOptions.filter(o=>String(o.group_id)===String(g.id));
+    const opts = state.addonOptions.filter(o=>o.group_id===g.id);
     const optChips = opts.map(o=>'<span class="text-[11px] bg-orange-50 text-orange-700 px-2 py-1 rounded-full">'+escapeHtml(o.name)+(o.price_delta?(' '+(o.price_delta>0?'+':'')+money(o.price_delta)):'')+'</span>').join('');
     return '<div class="bg-white rounded-xl border border-orange-100 p-3 shadow-sm">'
       + '<div class="flex justify-between items-center"><div>'
