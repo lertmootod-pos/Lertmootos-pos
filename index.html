@@ -41,6 +41,31 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 </style>
 </head>
 <body class="min-h-screen flex flex-col text-gray-800 antialiased pb-20">
+
+<!-- ============ PAGE LOGIN (หน้าเข้าสู่ระบบแบบแยกต่างหาก) ============ -->
+<section id="page-login" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full text-center">
+  <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
+    <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto shadow-lg shadow-orange-500/30">
+      🏪
+    </div>
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">เข้าสู่ระบบ POS</h2>
+      <p class="text-xs text-gray-400 mt-1">กรุณากรอก PIN / Passcode เพื่อเข้าใช้งาน</p>
+    </div>
+    
+    <div class="space-y-3 pt-2">
+      <input type="password" id="login-passcode-input" placeholder="กรอก PIN / Passcode" 
+        class="w-full text-center tracking-widest text-lg border border-orange-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
+      
+      <button onclick="handleSeparateLogin()" class="w-full py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-sm tap shadow-md shadow-orange-500/20">
+        เข้าสู่ระบบ
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Wrapper สำหรับซ่อนหน้าหลักเมื่อยังไม่ได้เข้าสู่ระบบ -->
+<div id="main-app-wrapper" class="hidden flex-1 flex flex-col">
   
 <!-- Header -->
 <header class="bg-[#f7f3ed] px-4 py-3 flex justify-between items-center sticky top-0 z-30 border-b border-orange-100">
@@ -80,7 +105,7 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 <main class="flex-1 overflow-y-auto pb-10 hide-scrollbar px-4 pt-3">
 
 <!-- ============ PAGE 1: HOME / ORDER MENU ============ -->
-<section id="page-home" class="page active space-y-4 max-w-4xl mx-auto">
+<section id="page-home" class="page space-y-4 max-w-4xl mx-auto">
 <div id="home-table-banner" class="hidden bg-orange-500 text-white rounded-2xl px-4 py-2.5 flex items-center justify-between text-sm font-semibold">
 <span id="home-table-label"></span>
 <button onclick="goPage('order')" class="underline">ดูรายการโต๊ะนี้</button>
@@ -338,6 +363,8 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
   </button>
 </nav>
 
+</div>
+
 <div id="toast-container"></div>
 
 <!-- Generic modal shell -->
@@ -370,9 +397,47 @@ function getPasscodes() {
 
 let currentUserRole = localStorage.getItem('pos_user_role') || null;
 
+// ตรวจสอบการสิทธิ์เปิดใช้งานระบบ
+function checkAuth() {
+  const mainWrapper = document.getElementById('main-app-wrapper');
+  if (!currentUserRole) {
+    if (mainWrapper) mainWrapper.classList.add('hidden');
+    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    const loginPage = document.getElementById('page-login');
+    if (loginPage) loginPage.classList.add('active');
+  } else {
+    if (mainWrapper) mainWrapper.classList.remove('hidden');
+    const loginPage = document.getElementById('page-login');
+    if (loginPage) loginPage.classList.remove('active');
+    applyRolePermissions();
+  }
+}
+
+// จัดการการเข้ารหัสผ่านหน้า login แยก
+function handleSeparateLogin() {
+  const passInput = document.getElementById('login-passcode-input');
+  const pass = passInput ? passInput.value.trim() : '';
+  const passcodes = getPasscodes();
+
+  if (pass === passcodes.OWNER) {
+    currentUserRole = 'owner';
+  } else if (pass === passcodes.STAFF) {
+    currentUserRole = 'staff';
+  } else {
+    toast('รหัสผ่านไม่ถูกต้อง');
+    return;
+  }
+
+  localStorage.setItem('pos_user_role', currentUserRole);
+  if (passInput) passInput.value = '';
+  toast('เข้าสู่ระบบสำเร็จในสิทธิ์: ' + (currentUserRole === 'owner' ? 'เจ้าของร้าน' : 'พนักงาน'));
+  checkAuth();
+  switchTab('tab-home');
+}
+
 function applyRolePermissions() {
   if (!currentUserRole) {
-    showLoginModal();
+    checkAuth();
     return;
   }
   
@@ -443,7 +508,7 @@ function showLoginModal() {
       currentUserRole = result.value;
       localStorage.setItem('pos_user_role', currentUserRole);
       toast('เข้าสู่ระบบสำเร็จในสิทธิ์: ' + (currentUserRole==='owner'?'เจ้าของร้าน':'พนักงาน'));
-      applyRolePermissions();
+      checkAuth();
     }
   });
 }
@@ -452,7 +517,7 @@ function logout() {
   localStorage.removeItem('pos_user_role');
   currentUserRole = null;
   toast('ออกจากระบบเรียบร้อยแล้ว');
-  showLoginModal();
+  checkAuth();
 }
 
 function showChangePasscodeModal() {
@@ -1441,8 +1506,7 @@ INIT
 (async function init(){
   await fetchAll();
   setupRealtime();
-  applyRolePermissions();
-  switchTab('tab-home');
+  checkAuth();
 })();
 </script>
 </body>
