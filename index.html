@@ -103,35 +103,12 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 
 <!-- ============ PAGE 3: HISTORY / DASHBOARD ============ -->
 <section id="page-history" class="page space-y-4 max-w-4xl mx-auto">
-<!-- สรุปยอดขายวันนี้ (กรอบแยกพิเศษ) -->
-<div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-4 text-white shadow-md">
-  <div class="flex justify-between items-center mb-2">
-    <span class="text-xs font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">สรุปยอดขายวันนี้</span>
-    <span class="text-xs opacity-80" id="today-date-label"></span>
-  </div>
-  <div class="grid grid-cols-3 gap-2 mt-2 text-center">
-    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2">
-      <p class="text-[10px] opacity-80">ยอดขายวันนี้</p>
-      <p class="font-extrabold text-base sm:text-lg" id="today-stat-total">฿0</p>
-    </div>
-    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2">
-      <p class="text-[10px] opacity-80">จำนวนบิล</p>
-      <p class="font-extrabold text-base sm:text-lg" id="today-stat-orders">0</p>
-    </div>
-    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-2">
-      <p class="text-[10px] opacity-80">เฉลี่ย/บิล</p>
-      <p class="font-extrabold text-base sm:text-lg" id="today-stat-avg">฿0</p>
-    </div>
-  </div>
-</div>
-
 <div class="flex gap-2" id="range-tabs">
 <button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
 <button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
 <button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
 <button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
 </div>
-
 <div class="grid grid-cols-3 gap-3">
 <div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
 <p class="text-[11px] text-gray-400">ยอดขายรวม</p>
@@ -146,35 +123,8 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <p class="font-bold text-lg" id="stat-avg">฿0</p>
 </div>
 </div>
-
-<!-- ส่วนเปรียบเทียบยอดขาย -->
-<div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm space-y-3">
-  <div class="flex justify-between items-center">
-    <p class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
-      <i data-lucide="arrow-left-right" class="w-4 h-4 text-orange-500"></i> เปรียบเทียบยอดขาย
-    </p>
-    <div class="flex bg-gray-100 p-0.5 rounded-full">
-      <button onclick="setCompareMode('day')" id="cmp-btn-day" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white text-orange-600 shadow-sm">เปรียบเทียบรายวัน</button>
-      <button onclick="setCompareMode('month')" id="cmp-btn-month" class="px-3 py-1 rounded-full text-[11px] font-medium text-gray-500">เปรียบเทียบรายเดือน</button>
-    </div>
-  </div>
-  <div id="compare-container" class="pt-1"></div>
-</div>
-
-<!-- กราฟแสดงยอดขาย -->
 <div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm">
 <canvas id="sales-chart" height="220"></canvas>
-</div>
-
-<!-- อันดับเมนูขายดี -->
-<div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm space-y-3">
-  <div class="flex justify-between items-center border-b border-orange-50 pb-2">
-    <p class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
-      <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> อันดับเมนูขายดี
-    </p>
-    <span class="text-[11px] text-gray-400">เรียงตามจำนวนที่ขายได้</span>
-  </div>
-  <div id="best-sellers-list" class="space-y-2"></div>
 </div>
 </section>
 
@@ -390,8 +340,7 @@ STATE
 let state = {
   categories: [], products: [], addonGroups: [], addonOptions: [], productAddonGroups: [],
   tablesList: [], openOrders: [], orderItems: [], orderItemAddons: [], shopSettings: null,
-  currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day',
-  compareMode: 'day'
+  currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day'
 };
 let localAddonOptions = [];
 
@@ -964,119 +913,12 @@ document.addEventListener('click', e=>{
     renderDashboard();
   }
 });
-
-function setCompareMode(mode) {
-  state.compareMode = mode;
-  const btnDay = document.getElementById('cmp-btn-day');
-  const btnMonth = document.getElementById('cmp-btn-month');
-  if(mode==='day') {
-    btnDay.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-orange-600 shadow-sm';
-    btnMonth.className = 'px-3 py-1 rounded-full text-[11px] font-medium text-gray-500';
-  } else {
-    btnMonth.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-white text-orange-600 shadow-sm';
-    btnDay.className = 'px-3 py-1 rounded-full text-[11px] font-medium text-gray-500';
-  }
-  renderDashboard();
-}
-
 async function renderDashboard(){
   const {data: paidOrders} = await sb.from('orders').select('*').eq('status','paid').order('closed_at');
   const orders = paidOrders || [];
-  
-  // 1. คำนวณยอดขายวันนี้ (Today's Summary)
-  const now = new Date();
-  const todayStr = now.toDateString();
-  const todayOrders = orders.filter(o => {
-    const d = new Date(o.closed_at || o.created_at);
-    return d.toDateString() === todayStr;
-  });
-  const todayTotal = todayOrders.reduce((s,o)=>s+Number(o.total||0), 0);
-  const todayCount = todayOrders.length;
-  const todayAvg = todayCount > 0 ? Math.round(todayTotal / todayCount) : 0;
-
-  document.getElementById('today-date-label').textContent = now.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'});
-  document.getElementById('today-stat-total').textContent = money(todayTotal);
-  document.getElementById('today-stat-orders').textContent = todayCount;
-  document.getElementById('today-stat-avg').textContent = money(todayAvg);
-
-  // 2. คำนวณเปรียบเทียบยอดขาย (Daily / Monthly Comparison)
-  const compareBox = document.getElementById('compare-container');
-  if (state.compareMode === 'day') {
-    // เปรียบเทียบ วันนี้ vs เมื่อวาน
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toDateString();
-    
-    const yesterdayOrders = orders.filter(o => new Date(o.closed_at || o.created_at).toDateString() === yesterdayStr);
-    const yesterdayTotal = yesterdayOrders.reduce((s,o)=>s+Number(o.total||0), 0);
-    
-    const diff = todayTotal - yesterdayTotal;
-    const pct = yesterdayTotal > 0 ? ((diff / yesterdayTotal) * 100).toFixed(1) : (todayTotal > 0 ? 100 : 0);
-    const isUp = diff >= 0;
-
-    compareBox.innerHTML = `
-      <div class="grid grid-cols-2 gap-2 text-center bg-orange-50/50 p-3 rounded-xl border border-orange-100">
-        <div>
-          <p class="text-[11px] text-gray-500">วันนี้</p>
-          <p class="font-bold text-sm text-gray-800">${money(todayTotal)}</p>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-500">เมื่อวาน</p>
-          <p class="font-bold text-sm text-gray-800">${money(yesterdayTotal)}</p>
-        </div>
-      </div>
-      <div class="flex justify-between items-center text-xs px-1 mt-2">
-        <span class="text-gray-500">ส่วนต่างเปรียบเทียบ:</span>
-        <span class="font-bold ${isUp ? 'text-green-600' : 'text-red-500'} flex items-center gap-1">
-          <i data-lucide="${isUp ? 'trending-up' : 'trending-down'}" class="w-3.5 h-3.5"></i>
-          ${isUp ? '+' : ''}${money(diff)} (${isUp ? '+' : ''}${pct}%)
-        </span>
-      </div>
-    `;
-  } else {
-    // เปรียบเทียบ เดือนนี้ vs เดือนที่แล้ว
-    const thisMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
-    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const prevMonthKey = `${prevMonthDate.getFullYear()}-${prevMonthDate.getMonth()}`;
-
-    let thisMonthTotal = 0;
-    let prevMonthTotal = 0;
-
-    orders.forEach(o => {
-      const d = new Date(o.closed_at || o.created_at);
-      const k = `${d.getFullYear()}-${d.getMonth()}`;
-      if (k === thisMonthKey) thisMonthTotal += Number(o.total || 0);
-      if (k === prevMonthKey) prevMonthTotal += Number(o.total || 0);
-    });
-
-    const diff = thisMonthTotal - prevMonthTotal;
-    const pct = prevMonthTotal > 0 ? ((diff / prevMonthTotal) * 100).toFixed(1) : (thisMonthTotal > 0 ? 100 : 0);
-    const isUp = diff >= 0;
-
-    compareBox.innerHTML = `
-      <div class="grid grid-cols-2 gap-2 text-center bg-orange-50/50 p-3 rounded-xl border border-orange-100">
-        <div>
-          <p class="text-[11px] text-gray-500">เดือนนี้ (${now.toLocaleDateString('th-TH', {month:'short'})})</p>
-          <p class="font-bold text-sm text-gray-800">${money(thisMonthTotal)}</p>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-500">เดือนที่แล้ว (${prevMonthDate.toLocaleDateString('th-TH', {month:'short'})})</p>
-          <p class="font-bold text-sm text-gray-800">${money(prevMonthTotal)}</p>
-        </div>
-      </div>
-      <div class="flex justify-between items-center text-xs px-1 mt-2">
-        <span class="text-gray-500">ส่วนต่างเปรียบเทียบ:</span>
-        <span class="font-bold ${isUp ? 'text-green-600' : 'text-red-500'} flex items-center gap-1">
-          <i data-lucide="${isUp ? 'trending-up' : 'trending-down'}" class="w-3.5 h-3.5"></i>
-          ${isUp ? '+' : ''}${money(diff)} (${isUp ? '+' : ''}${pct}%)
-        </span>
-      </div>
-    `;
-  }
-
-  // 3. แสดงกราฟยอดขาย
   const range = state.dashboardRange;
   let buckets = [];
+  const now = new Date();
   function fmtDay(d){ return d.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'}); }
   if(range==='day'){
     for(let i=13;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); buckets.push({key:d.toDateString(), label:fmtDay(d), total:0}); }
@@ -1087,7 +929,7 @@ async function renderDashboard(){
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const ws=weekStart(d); const b=buckets.find(x=>x.key===ws.toDateString()); if(b) b.total+=Number(o.total); });
   } else if(range==='month'){
     for(let i=11;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); buckets.push({key:d.getFullYear()+'-'+d.getMonth(), label:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}), total:0}); }
-    orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=d.getFullYear()+'-'+d.getMonth(); const b=buckets.find(x=>key===key); if(b) b.total+=Number(o.total); });
+    orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=d.getFullYear()+'-'+d.getMonth(); const b=buckets.find(x=>x.key===key); if(b) b.total+=Number(o.total); });
   } else {
     for(let i=4;i>=0;i--){ const y=now.getFullYear()-i; buckets.push({key:''+y, label:''+y, total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=''+d.getFullYear(); const b=buckets.find(x=>x.key===key); if(b) b.total+=Number(o.total); });
@@ -1103,50 +945,6 @@ async function renderDashboard(){
     data:{ labels: buckets.map(b=>b.label), datasets:[{ label:'ยอดขาย (฿)', data: buckets.map(b=>b.total), backgroundColor:'#f97316', borderRadius:6 }] },
     options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
   });
-
-  // 4. คำนวณอันดับเมนูขายดี
-  renderBestSellers();
-  lucide.createIcons();
-}
-
-async function renderBestSellers(){
-  const {data: allItems} = await sb.from('order_items').select('*').eq('cancelled', false);
-  const items = allItems || [];
-  
-  const counts = {};
-  items.forEach(i => {
-    const name = i.product_name || 'ไม่ระบุชื่อ';
-    if (!counts[name]) counts[name] = { qty: 0, revenue: 0 };
-    counts[name].qty += Number(i.qty || 0);
-    counts[name].revenue += Number(i.unit_price || 0) * Number(i.qty || 0);
-  });
-
-  const sorted = Object.entries(counts)
-    .map(([name, data]) => ({ name, ...data }))
-    .sort((a,b) => b.qty - a.qty)
-    .slice(0, 10); // แสดง 10 อันดับแรก
-
-  const listEl = document.getElementById('best-sellers-list');
-  if (sorted.length === 0) {
-    listEl.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">ยังไม่มีข้อมูลการขายเมนู</p>';
-    return;
-  }
-
-  listEl.innerHTML = sorted.map((item, idx) => {
-    const badgeColor = idx === 0 ? 'bg-amber-500 text-white' : idx === 1 ? 'bg-gray-400 text-white' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-gray-100 text-gray-600';
-    return `
-      <div class="flex items-center justify-between p-2 rounded-xl hover:bg-orange-50/50 transition">
-        <div class="flex items-center gap-3 min-w-0">
-          <span class="w-6 h-6 rounded-full ${badgeColor} text-[11px] font-bold flex items-center justify-center shrink-0">${idx + 1}</span>
-          <span class="text-xs font-semibold text-gray-800 truncate">${escapeHtml(item.name)}</span>
-        </div>
-        <div class="text-right shrink-0 ml-2">
-          <span class="text-xs font-bold text-orange-600 block">${item.qty} จาน/แก้ว</span>
-          <span class="text-[10px] text-gray-400 block">${money(item.revenue)}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
 }
 
 /* ============================================================
