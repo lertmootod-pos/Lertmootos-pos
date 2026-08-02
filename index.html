@@ -134,43 +134,12 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 
 <!-- ============ PAGE 3: HISTORY / DASHBOARD ============ -->
 <section id="page-history" class="page space-y-4 max-w-4xl mx-auto">
-<!-- สรุปยอดขายวันนี้ -->
-<div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
-  <div>
-    <p class="text-xs text-orange-100 font-medium">ยอดขายวันนี้ (Real-time)</p>
-    <p class="text-2xl font-bold mt-0.5" id="stat-today-total">฿0</p>
-    <p class="text-[11px] text-orange-100 mt-1" id="stat-today-bills">จำนวน 0 บิล</p>
-  </div>
-  <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">
-    📅
-  </div>
+<div class="flex gap-2" id="range-tabs">
+<button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
+<button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
+<button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
+<button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
 </div>
-
-<!-- ตัวเลือกช่วงเวลาวิเคราะห์ข้อมูล -->
-<div class="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-orange-100 shadow-sm">
-  <div class="flex gap-1 overflow-x-auto hide-scrollbar" id="range-tabs">
-    <button data-range="day" class="range-btn px-3.5 py-1.5 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
-    <button data-range="week" class="range-btn px-3.5 py-1.5 bg-white text-gray-600 border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
-    <button data-range="month" class="range-btn px-3.5 py-1.5 bg-white text-gray-600 border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
-    <button data-range="year" class="range-btn px-3.5 py-1.5 bg-white text-gray-600 border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
-  </div>
-  <!-- ตัวเลือกเปรียบเทียบข้อมูล (รายวัน/รายเดือนแบบเลือกเอง) -->
-  <div class="flex items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-orange-50">
-    <span class="text-[11px] text-gray-400 font-bold shrink-0">เปรียบเทียบ:</span>
-    <select id="compare-mode-select" onchange="renderDashboard()" class="text-xs border border-orange-200 rounded-xl px-2.5 py-1.5 bg-orange-50 text-orange-700 font-semibold focus:outline-none">
-      <option value="none">ไม่เปรียบเทียบ</option>
-      <option value="prev_period">เทียบช่วงเวลาก่อนหน้า</option>
-      <option value="prev_year">เทียบช่วงเวลาเดียวกันปีก่อน</option>
-    </select>
-  </div>
-</div>
-
-<!-- การแสดงผลเปรียบเทียบข้อมูล -->
-<div id="comparison-banner" class="hidden bg-orange-50 border border-orange-200 rounded-2xl p-3 flex items-center justify-between text-xs font-medium text-gray-700">
-  <span id="comparison-text">-</span>
-  <span id="comparison-badge" class="font-bold px-2 py-0.5 rounded-full">-</span>
-</div>
-
 <div class="grid grid-cols-3 gap-3">
 <div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
 <p class="text-[11px] text-gray-400">ยอดขายรวม</p>
@@ -187,19 +156,6 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 </div>
 <div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm">
 <canvas id="sales-chart" height="220"></canvas>
-</div>
-
-<!-- เมนูขายดีเรียงลำดับอยู่ด้านล่างกราฟ -->
-<div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm space-y-3">
-  <div class="flex items-center justify-between">
-    <h3 class="font-bold text-sm text-gray-800 flex items-center gap-2">
-      <i data-lucide="award" class="w-4 h-4 text-orange-500"></i> 10 เมนูขายดีในช่วงเวลานี้
-    </h3>
-    <span class="text-[11px] text-gray-400">เรียงตามจำนวนที่ขายได้</span>
-  </div>
-  <div id="top-products-list" class="space-y-2">
-    <!-- รายการเมนูขายดีจะถูกเรนเดอร์ที่นี่ -->
-  </div>
 </div>
 </section>
 
@@ -434,6 +390,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ============================================================
 AUTH / USER ROLES SYSTEM
 ============================================================ */
+// โหลดรหัสผ่านจาก localStorage ถ้ามี หรือใช้ค่าเริ่มต้น
 function getPasscodes() {
   return {
     OWNER: localStorage.getItem('pos_pass_owner') || '1234',
@@ -443,6 +400,7 @@ function getPasscodes() {
 
 let currentUserRole = localStorage.getItem('pos_user_role') || null;
 
+// ตรวจสอบการสิทธิ์เปิดใช้งานระบบ
 function checkAuth() {
   const mainWrapper = document.getElementById('main-app-wrapper');
   if (!currentUserRole) {
@@ -458,6 +416,7 @@ function checkAuth() {
   }
 }
 
+// จัดการการเข้ารหัสผ่านหน้า login แยก
 function handleSeparateLogin() {
   const passInput = document.getElementById('login-passcode-input');
   const pass = passInput ? passInput.value.trim() : '';
@@ -487,6 +446,7 @@ function applyRolePermissions() {
   
   const isOwner = currentUserRole === 'owner';
   
+  // แสดง / ซ่อน เมนูสำหรับเจ้าของร้าน
   document.querySelectorAll('.owner-only').forEach(el => {
     if (isOwner) {
       el.classList.remove('hidden');
@@ -495,6 +455,7 @@ function applyRolePermissions() {
     }
   });
 
+  // อัปเดตป้ายสถานะสิทธิ์
   const roleText = isOwner ? 'เจ้าของร้าน' : 'พนักงานร้าน';
   const roleBadgeClass = isOwner ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
 
@@ -513,6 +474,7 @@ function applyRolePermissions() {
     profileBadge.className = `inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleBadgeClass}`;
   }
 
+  // หากเป็นพนักงาน แล้วอยู่หน้าสำหรับเจ้าของร้าน ให้เด้งกลับไปหน้าแรก
   if (!isOwner && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(currentPage)) {
     switchTab('tab-home');
   }
@@ -674,6 +636,7 @@ function switchTab(tabId) {
 }
 
 function goPage(p){
+  // บล็อกการเข้าถึงหน้าเจ้าของร้านสำหรับพนักงาน
   if (currentUserRole !== 'owner' && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(p)) {
     toast('หน้านี้เฉพาะเจ้าของร้านเท่านั้น');
     return;
@@ -1188,178 +1151,55 @@ function printReceipt(){
 }
 
 /* ============================================================
-HISTORY / DASHBOARD (ปรับปรุงเพิ่มเติมตามโจทย์)
+HISTORY / DASHBOARD
 ============================================================ */
 let chartInstance = null;
 document.addEventListener('click', e=>{
   const btn = e.target.closest('.range-btn');
   if(btn){
-    document.querySelectorAll('.range-btn').forEach(b=>{ b.className='range-btn px-3.5 py-1.5 bg-white text-gray-600 border border-orange-100 rounded-full text-xs font-semibold'; });
-    btn.className = 'range-btn px-3.5 py-1.5 bg-orange-500 text-white rounded-full text-xs font-bold';
+    document.querySelectorAll('.range-btn').forEach(b=>{ b.className='range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold'; });
+    btn.className = 'range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold';
     state.dashboardRange = btn.dataset.range;
     renderDashboard();
   }
 });
-
 async function renderDashboard(){
   if (currentUserRole !== 'owner') return;
   const {data: paidOrders} = await sb.from('orders').select('*').eq('status','paid').order('closed_at');
   const orders = paidOrders || [];
   const range = state.dashboardRange;
-  const compareMode = document.getElementById('compare-mode-select')?.value || 'none';
-  
-  const now = new Date();
-  
-  // 1. คำนวณยอดขายวันนี้ (Real-time)
-  const todayStr = now.toDateString();
-  const todayOrders = orders.filter(o => {
-    const d = new Date(o.closed_at || o.created_at);
-    return d.toDateString() === todayStr;
-  });
-  const todayTotal = todayOrders.reduce((s, o) => s + Number(o.total), 0);
-  document.getElementById('stat-today-total').textContent = money(todayTotal);
-  document.getElementById('stat-today-bills').textContent = `จำนวน ${todayOrders.length} บิล`;
-
   let buckets = [];
+  const now = new Date();
   function fmtDay(d){ return d.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'}); }
-
-  // สร้าง Buckets ตามช่วงเวลาหลัก
   if(range==='day'){
-    for(let i=13;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); buckets.push({key:d.toDateString(), label:fmtDay(d), total:0, dateObj:d}); }
+    for(let i=13;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); buckets.push({key:d.toDateString(), label:fmtDay(d), total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const b=buckets.find(x=>x.key===d.toDateString()); if(b) b.total+=Number(o.total); });
   } else if(range==='week'){
     function weekStart(d){ const x=new Date(d); const day=x.getDay(); x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
-    for(let i=7;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i*7); const ws=weekStart(d); buckets.push({key:ws.toDateString(), label:fmtDay(ws), total:0, dateObj:ws}); }
+    for(let i=7;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i*7); const ws=weekStart(d); buckets.push({key:ws.toDateString(), label:fmtDay(ws), total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const ws=weekStart(d); const b=buckets.find(x=>x.key===ws.toDateString()); if(b) b.total+=Number(o.total); });
   } else if(range==='month'){
-    for(let i=11;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); buckets.push({key:d.getFullYear()+'-'+d.getMonth(), label:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}), total:0, dateObj:d}); }
+    for(let i=11;i>=0;i--){ const d=new Date(now.getFullYear(), now.getMonth()-i, 1); buckets.push({key:d.getFullYear()+'-'+d.getMonth(), label:d.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}), total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=d.getFullYear()+'-'+d.getMonth(); const b=buckets.find(x=>x.key===key); if(b) b.total+=Number(o.total); });
   } else {
-    for(let i=4;i>=0;i--){ const y=now.getFullYear()-i; buckets.push({key:''+y, label:''+y, total:0, dateObj:new Date(y,0,1)}); }
+    for(let i=4;i>=0;i--){ const y=now.getFullYear()-i; buckets.push({key:''+y, label:''+y, total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=''+d.getFullYear(); const b=buckets.find(x=>x.key===key); if(b) b.total+=Number(o.total); });
   }
-
-  // กรองบิลในช่วงเวลาที่แสดงผลหลักเพื่อหา Stat รวม
-  let filteredOrders = orders;
-  if(range==='day'){
-    const startDate = new Date(now); startDate.setDate(startDate.getDate()-13); startDate.setHours(0,0,0,0);
-    filteredOrders = orders.filter(o => new Date(o.closed_at||o.created_at) >= startDate);
-  } else if(range==='week'){
-    const startDate = new Date(now); startDate.setDate(startDate.getDate()-49); startDate.setHours(0,0,0,0);
-    filteredOrders = orders.filter(o => new Date(o.closed_at||o.created_at) >= startDate);
-  } else if(range==='month'){
-    const startDate = new Date(now.getFullYear(), now.getMonth()-11, 1);
-    filteredOrders = orders.filter(o => new Date(o.closed_at||o.created_at) >= startDate);
-  } else if(range==='year'){
-    const startDate = new Date(now.getFullYear()-4, 0, 1);
-    filteredOrders = orders.filter(o => new Date(o.closed_at||o.created_at) >= startDate);
-  }
-
-  const grandTotal = filteredOrders.reduce((s,o)=>s+Number(o.total),0);
+  const grandTotal = orders.reduce((s,o)=>s+Number(o.total),0);
   document.getElementById('stat-total').textContent = money(grandTotal);
-  document.getElementById('stat-orders').textContent = filteredOrders.length;
-  document.getElementById('stat-avg').textContent = money(filteredOrders.length?Math.round(grandTotal/filteredOrders.length):0);
-
-  // การจัดการข้อมูลเปรียบเทียบ (Comparison)
-  let comparisonData = [];
-  const compBanner = document.getElementById('comparison-banner');
-  if(compareMode !== 'none'){
-    compBanner.classList.remove('hidden');
-    // จำลองหรือคำนวณช่วงเวลาก่อนหน้า
-    let prevGrandTotal = 0;
-    if(compareMode === 'prev_period'){
-      // ช่วงเวลาก่อนหน้า (เช่น ถ้าดู 14 วันล่าสุด เอา 14 วันก่อนหน้า)
-      prevGrandTotal = grandTotal * 0.85; // ค่าจำลองหรือเทียบสัดส่วนคร่าวๆ จากฐานข้อมูลจริงในระบบ
-      document.getElementById('comparison-text').textContent = 'เปรียบเทียบกับช่วงเวลาก่อนหน้า (Previous Period)';
-    } else {
-      prevGrandTotal = grandTotal * 0.92;
-      document.getElementById('comparison-text').textContent = 'เปรียบเทียบกับช่วงเวลาเดียวกันในปีที่แล้ว (YoY)';
-    }
-    const diff = grandTotal - prevGrandTotal;
-    const pct = prevGrandTotal > 0 ? ((diff / prevGrandTotal) * 100).toFixed(1) : 0;
-    const badge = document.getElementById('comparison-badge');
-    if(diff >= 0){
-      badge.textContent = `+${pct}% (${money(diff)})`;
-      badge.className = 'font-bold px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-xs';
-    } else {
-      badge.textContent = `${pct}% (${money(diff)})`;
-      badge.className = 'font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-xs';
-    }
-  } else {
-    compBanner.classList.add('hidden');
-  }
-
-  // เรนเดอร์กราฟ Chart.js
+  document.getElementById('stat-orders').textContent = orders.length;
+  document.getElementById('stat-avg').textContent = money(orders.length?Math.round(grandTotal/orders.length):0);
   const ctx = document.getElementById('sales-chart');
   if(chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
     type:'bar',
-    data:{ 
-      labels: buckets.map(b=>b.label), 
-      datasets:[{ 
-        label:'ยอดขาย (฿)', 
-        data: buckets.map(b=>b.total), 
-        backgroundColor:'#f97316', 
-        borderRadius:6 
-      }] 
-    },
+    data:{ labels: buckets.map(b=>b.label), datasets:[{ label:'ยอดขาย (฿)', data: buckets.map(b=>b.total), backgroundColor:'#f97316', borderRadius:6 }] },
     options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
   });
-
-  // 3. ข้อมูลเมนูขายดีเรียงลำดับด้านล่างกราฟ
-  await renderTopSellingProducts(filteredOrders);
-}
-
-async function renderTopSellingProducts(filteredOrders){
-  const orderIds = filteredOrders.map(o => o.id);
-  const topListContainer = document.getElementById('top-products-list');
-  
-  if(orderIds.length === 0){
-    topListContainer.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">ยังไม่มีข้อมูลการขายในช่วงเวลานี้</p>';
-    return;
-  }
-
-  // ดึง order_items ที่เกี่ยวข้องกับออเดอร์ที่ชำระเงินแล้วในช่วงเวลานี้
-  const {data: itemsData} = await sb.from('order_items').select('*').in('order_id', orderIds).eq('cancelled', false);
-  const items = itemsData || [];
-
-  // รวมยอดจำนวนที่ขายได้และรายได้แยกตาม product_id หรือ product_name
-  const statsMap = {};
-  items.forEach(item => {
-    const key = item.product_name;
-    if(!statsMap[key]){
-      statsMap[key] = { name: key, qty: 0, revenue: 0 };
-    }
-    statsMap[key].qty += Number(item.qty || 0);
-    statsMap[key].revenue += Number(item.unit_price || 0) * Number(item.qty || 0);
-  });
-
-  const sortedProducts = Object.values(statsMap).sort((a,b) => b.qty - a.qty).slice(0, 10);
-
-  if(sortedProducts.length === 0){
-    topListContainer.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">ไม่พบรายการสินค้าขายดี</p>';
-    return;
-  }
-
-  topListContainer.innerHTML = sortedProducts.map((p, index) => {
-    let rankBg = 'bg-gray-100 text-gray-600';
-    if(index === 0) rankBg = 'bg-amber-500 text-white font-bold shadow-sm shadow-amber-500/30';
-    else if(index === 1) rankBg = 'bg-slate-300 text-white font-bold';
-    else if(index === 2) rankBg = 'bg-orange-400 text-white font-bold';
-
-    return '<div class="flex items-center justify-between p-2.5 rounded-xl border border-orange-50 bg-orange-50/20">'
-      + '<div class="flex items-center gap-3 min-w-0">'
-      + '<div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 '+rankBg+'">'+(index+1)+'</div>'
-      + '<div class="min-w-0"><p class="text-xs font-bold text-gray-800 truncate">'+escapeHtml(p.name)+'</p>'
-      + '<p class="text-[11px] text-gray-400">ขายได้ '+p.qty+' หน่วย</p></div>'
-      + '</div>'
-      + '<div class="text-right shrink-0"><p class="text-xs font-bold text-orange-600">'+money(p.revenue)+'</p></div>'
-      + '</div>';
-  }).join('');
 }
 
 /* ============================================================
-STOCK PAGE
+STOCK PAGE (ปรับปรุงให้แยกตามหมวดหมู่ แสดงจำนวน และปรับการตั้งค่าสต็อก)
 ============================================================ */
 function renderStock(){
   if (currentUserRole !== 'owner') return;
@@ -1370,10 +1210,13 @@ function renderStock(){
     return;
   }
 
+  // สร้างอาร์เรย์หมวดหมู่ทั้งหมด รวมถึงกรณีที่ไม่มีหมวดหมู่
   const categoriesList = [...state.categories, { id: 'uncategorized', name: 'ไม่มีหมวดหมู่' }];
+
   let html = '';
 
   categoriesList.forEach(cat => {
+    // กรองสินค้าเฉพาะหมวดหมู่นี้
     const catProducts = state.products.filter(p => {
       if (cat.id === 'uncategorized') return !p.category_id;
       return String(p.category_id) === String(cat.id);
@@ -1434,6 +1277,7 @@ function renderStock(){
   lucide.createIcons();
 }
 
+// ฟังก์ชั่นช่วยในการเปิด/ปิด การติดตามสต็อกด่วน
 async function toggleStockTracking(productId, track) {
   const { error } = await sb.from('products').update({ track_stock: track }).eq('id', productId);
   if (error) {
@@ -1489,7 +1333,7 @@ async function saveCategory(id){
   closeGenericModal(); await fetchAll();
 }
 
-/* ---------- Products Admin ---------- */
+/* ---------- Products Admin (ปรับเพิ่มฟิลด์สต็อกสินค้า) ---------- */
 function renderAdminProducts(){
   const list = document.getElementById('admin-products-list');
   list.innerHTML = state.products.map(p=>{
@@ -1535,6 +1379,7 @@ function openProductModal(id){
     + '<div><label class="text-xs font-bold text-gray-500">หมวดหมู่</label>'
     + '<select id="prod-cat-input" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"><option value="">— ไม่มี —</option>'+catOptions+'</select></div>'
     
+    // เพิ่มการตั้งค่าสต็อกสินค้า
     + '<div class="p-3 border border-orange-100 rounded-xl bg-orange-50/50 space-y-2">'
     + '<label class="flex items-center gap-2 text-xs font-bold text-gray-700 cursor-pointer">'
     + '<input type="checkbox" id="prod-track-stock-input" '+(isTracking ? 'checked' : '')+' onchange="document.getElementById(\'stock-qty-container\').classList.toggle(\'hidden\', !this.checked)">'
@@ -1736,7 +1581,7 @@ async function uploadLogo(file){
 async function saveBillSettings(){
   const receipt_paper = document.getElementById('receipt-paper-input').value;
   const receipt_footer = document.getElementById('receipt-footer-input').value;
-  const auto_print = document.getElementById('receipt-auto-print-input'].checked;
+  const auto_print = document.getElementById('receipt-auto-print-input').checked;
   await sb.from('shop_settings').upsert({id:1, receipt_paper, receipt_footer, auto_print, updated_at: new Date().toISOString()});
   toast('บันทึกการตั้งค่าบิลแล้ว'); await fetchAll();
 }
