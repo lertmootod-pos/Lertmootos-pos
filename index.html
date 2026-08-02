@@ -156,47 +156,60 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
   </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-orange-100 divide-y divide-gray-100 owner-only">
-  <div onclick="goPage('admin-shop')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-t-2xl">
+<div class="bg-white rounded-2xl shadow-sm border border-orange-100 divide-y divide-gray-100">
+  <div onclick="goPage('admin-shop')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-t-2xl owner-only">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="qr-code" class="w-5 h-5"></i></span>
       <span class="text-sm font-medium text-gray-700">ตั้งค่าชื่อร้าน / QR รับเงิน / บิล</span>
     </div>
     <span class="text-gray-300 text-sm">›</span>
   </div>
-  <div onclick="goPage('admin-products')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+  <div onclick="goPage('admin-products')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 owner-only">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="package" class="w-5 h-5"></i></span>
       <span class="text-sm font-medium text-gray-700">จัดการเมนูอาหารและราคา</span>
     </div>
     <span class="text-gray-300 text-sm">›</span>
   </div>
-  <div onclick="goPage('admin-categories')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+  <div onclick="goPage('admin-categories')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 owner-only">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="tags" class="w-5 h-5"></i></span>
       <span class="text-sm font-medium text-gray-700">จัดการหมวดหมู่สินค้า</span>
     </div>
     <span class="text-gray-300 text-sm">›</span>
   </div>
-  <div onclick="goPage('admin-addons')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50">
+  <div onclick="goPage('admin-addons')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 owner-only">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="list-plus" class="w-5 h-5"></i></span>
       <span class="text-sm font-medium text-gray-700">จัดการท็อปปิ้ง / ตัวเลือกเสริม</span>
     </div>
     <span class="text-gray-300 text-sm">›</span>
   </div>
-  <div onclick="goPage('admin-tables')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-b-2xl">
+  <div onclick="goPage('admin-tables')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 owner-only">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="table" class="w-5 h-5"></i></span>
       <span class="text-sm font-medium text-gray-700">จัดการผังโต๊ะในร้าน</span>
     </div>
     <span class="text-gray-300 text-sm">›</span>
   </div>
+  <!-- เมนูเปลี่ยนรหัสผ่าน -->
+  <div onclick="showChangePasscodeModal()" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-b-2xl">
+    <div class="flex items-center gap-3">
+      <span class="text-orange-500"><i data-lucide="key-round" class="w-5 h-5"></i></span>
+      <span class="text-sm font-medium text-gray-700">เปลี่ยนรหัสผ่านเข้าใช้งาน</span>
+    </div>
+    <span class="text-gray-300 text-sm">›</span>
+  </div>
 </div>
 
-<button onclick="showLoginModal()" class="w-full py-3 bg-red-50 text-red-600 rounded-2xl font-bold text-sm tap flex items-center justify-center gap-2">
-  <i data-lucide="log-out" class="w-4 h-4"></i> สลับผู้ใช้งาน / เข้าสู่ระบบใหม่
-</button>
+<div class="space-y-2">
+  <button onclick="logout()" class="w-full py-3 bg-red-500 text-white rounded-2xl font-bold text-sm tap flex items-center justify-center gap-2 shadow-sm">
+    <i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ / LOG OUT
+  </button>
+  <button onclick="showLoginModal()" class="w-full py-2.5 bg-orange-50 text-orange-600 rounded-2xl font-semibold text-xs tap flex items-center justify-center gap-2">
+    <i data-lucide="user-check" class="w-4 h-4"></i> สลับสิทธิ์ผู้ใช้งาน
+  </button>
+</div>
 </section>
 
 <!-- ============ ORDER DETAIL FOR A TABLE ============ -->
@@ -319,7 +332,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
     <span class="text-[11px] mt-1 font-medium">คลังสินค้า</span>
   </button>
 
-  <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none owner-only">
+  <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
     <i data-lucide="user" class="w-5 h-5"></i>
     <span class="text-[11px] mt-1 font-medium">โปรไฟล์</span>
   </button>
@@ -347,11 +360,13 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ============================================================
 AUTH / USER ROLES SYSTEM
 ============================================================ */
-// กำหนดรหัสผ่านเข้าระบบ (สามารถแก้ไขได้ตรงนี้)
-const PASSCODES = {
-  OWNER: '1234', // รหัสเจ้าของร้าน
-  STAFF: '0000'  // รหัสพนักงาน
-};
+// โหลดรหัสผ่านจาก localStorage ถ้ามี หรือใช้ค่าเริ่มต้น
+function getPasscodes() {
+  return {
+    OWNER: localStorage.getItem('pos_pass_owner') || '1234',
+    STAFF: localStorage.getItem('pos_pass_staff') || '0000'
+  };
+}
 
 let currentUserRole = localStorage.getItem('pos_user_role') || null;
 
@@ -392,16 +407,17 @@ function applyRolePermissions() {
   }
 
   // หากเป็นพนักงาน แล้วอยู่หน้าสำหรับเจ้าของร้าน ให้เด้งกลับไปหน้าแรก
-  if (!isOwner && ['history', 'stock', 'profile', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(currentPage)) {
+  if (!isOwner && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(currentPage)) {
     switchTab('tab-home');
   }
 }
 
 function showLoginModal() {
   closeDrawer();
+  const passcodes = getPasscodes();
   Swal.fire({
     title: 'กรุณาเข้าสู่ระบบ',
-    text: 'ใส่รหัสผ่านเจ้าของร้าน (1234) หรือ พนักงาน (0000)',
+    text: 'กรุณากรอก PIN / Passcode เพื่อใช้งานระบบ',
     input: 'password',
     inputAttributes: {
       autocapitalize: 'off',
@@ -413,9 +429,9 @@ function showLoginModal() {
     confirmButtonColor: '#f97316',
     allowOutsideClick: false,
     preConfirm: (pass) => {
-      if (pass === PASSCODES.OWNER) {
+      if (pass === passcodes.OWNER) {
         return 'owner';
-      } else if (pass === PASSCODES.STAFF) {
+      } else if (pass === passcodes.STAFF) {
         return 'staff';
       } else {
         Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง');
@@ -428,6 +444,67 @@ function showLoginModal() {
       localStorage.setItem('pos_user_role', currentUserRole);
       toast('เข้าสู่ระบบสำเร็จในสิทธิ์: ' + (currentUserRole==='owner'?'เจ้าของร้าน':'พนักงาน'));
       applyRolePermissions();
+    }
+  });
+}
+
+function logout() {
+  localStorage.removeItem('pos_user_role');
+  currentUserRole = null;
+  toast('ออกจากระบบเรียบร้อยแล้ว');
+  showLoginModal();
+}
+
+function showChangePasscodeModal() {
+  const isOwner = currentUserRole === 'owner';
+  const roleTitle = isOwner ? 'เจ้าของร้าน' : 'พนักงาน';
+  
+  Swal.fire({
+    title: `เปลี่ยนรหัสผ่าน (${roleTitle})`,
+    html:
+      '<input id="swal-pass-old" class="swal2-input" type="password" placeholder="รหัสผ่านปัจจุบัน">' +
+      '<input id="swal-pass-new" class="swal2-input" type="password" placeholder="รหัสผ่านใหม่">' +
+      '<input id="swal-pass-confirm" class="swal2-input" type="password" placeholder="ยืนยันรหัสผ่านใหม่">',
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'บันทึกรหัสใหม่',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#f97316',
+    preConfirm: () => {
+      const passOld = document.getElementById('swal-pass-old').value;
+      const passNew = document.getElementById('swal-pass-new').value;
+      const passConfirm = document.getElementById('swal-pass-confirm').value;
+      
+      const passcodes = getPasscodes();
+      const currentRealPass = isOwner ? passcodes.OWNER : passcodes.STAFF;
+      
+      if (!passOld || !passNew || !passConfirm) {
+        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+        return false;
+      }
+      if (passOld !== currentRealPass) {
+        Swal.showValidationMessage('รหัสผ่านปัจจุบันไม่ถูกต้อง');
+        return false;
+      }
+      if (passNew !== passConfirm) {
+        Swal.showValidationMessage('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน');
+        return false;
+      }
+      if (passNew.length < 4) {
+        Swal.showValidationMessage('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+        return false;
+      }
+      
+      return passNew;
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      if (isOwner) {
+        localStorage.setItem('pos_pass_owner', result.value);
+      } else {
+        localStorage.setItem('pos_pass_staff', result.value);
+      }
+      toast('เปลี่ยนรหัสผ่านสำเร็จแล้ว!');
     }
   });
 }
@@ -492,7 +569,7 @@ function switchTab(tabId) {
 
 function goPage(p){
   // บล็อกการเข้าถึงหน้าเจ้าของร้านสำหรับพนักงาน
-  if (currentUserRole !== 'owner' && ['history', 'stock', 'profile', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(p)) {
+  if (currentUserRole !== 'owner' && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(p)) {
     toast('หน้านี้เฉพาะเจ้าของร้านเท่านั้น');
     return;
   }
