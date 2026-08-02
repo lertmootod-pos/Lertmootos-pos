@@ -8,6 +8,8 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<!-- ดึง CDN SweetAlert2 สำหรับทำหน้าต่าง Login -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
@@ -48,7 +50,9 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 </button>
 <h1 id="header-title" class="text-lg font-bold text-gray-900 ml-1 truncate">หน้าหลัก / สั่งเมนู</h1>
 </div>
-<div id="header-actions" class="flex items-center gap-2 shrink-0"></div>
+<div id="header-actions" class="flex items-center gap-2 shrink-0">
+  <span id="user-role-badge" class="text-xs bg-orange-100 text-orange-700 font-bold px-2.5 py-1 rounded-full">เจ้าของร้าน</span>
+</div>
 </header>
 
 <!-- Drawer -->
@@ -56,15 +60,17 @@ body{font-family:'Kanit',sans-serif;background:#f7f3ed;-webkit-tap-highlight-col
 <nav class="drawer" id="drawer">
 <div class="p-5 border-b border-orange-100">
 <p class="font-bold text-lg" id="drawer-shop-name">ร้านค้าของฉัน</p>
-<p class="text-xs text-gray-400">ระบบจัดการร้าน POS</p>
+<p class="text-xs text-gray-400" id="drawer-user-status">สถานะ: เจ้าของร้าน</p>
 </div>
 <div class="flex flex-col p-3 gap-1 text-sm font-semibold overflow-y-auto hide-scrollbar">
-<p class="px-4 text-xs text-gray-400 font-bold my-1">ตั้งค่าร้านค้า & เมนู</p>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-categories')"><i data-lucide="tags" class="w-4 h-4"></i> หมวดหมู่สินค้า</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-products')"><i data-lucide="package" class="w-4 h-4"></i> จัดการเมนู/สินค้า</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-addons')"><i data-lucide="list-plus" class="w-4 h-4"></i> ตัวเลือกเสริม</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-tables')"><i data-lucide="table" class="w-4 h-4"></i> จัดการโต๊ะ</button>
-<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left" onclick="goPage('admin-shop')"><i data-lucide="qr-code" class="w-4 h-4"></i> ร้าน / QR / บิล</button>
+<p class="px-4 text-xs text-gray-400 font-bold my-1 owner-only">ตั้งค่าร้านค้า & เมนู</p>
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left owner-only" onclick="goPage('admin-categories')"><i data-lucide="tags" class="w-4 h-4"></i> หมวดหมู่สินค้า</button>
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left owner-only" onclick="goPage('admin-products')"><i data-lucide="package" class="w-4 h-4"></i> จัดการเมนู/สินค้า</button>
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left owner-only" onclick="goPage('admin-addons')"><i data-lucide="list-plus" class="w-4 h-4"></i> ตัวเลือกเสริม</button>
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left owner-only" onclick="goPage('admin-tables')"><i data-lucide="table" class="w-4 h-4"></i> จัดการโต๊ะ</button>
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-left owner-only" onclick="goPage('admin-shop')"><i data-lucide="qr-code" class="w-4 h-4"></i> ร้าน / QR / บิล</button>
+<hr class="my-2 border-orange-100">
+<button class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 text-left" onclick="showLoginModal()"><i data-lucide="log-out" class="w-4 h-4"></i> สลับสิทธิ์ / ล็อกอิน</button>
 </div>
 <div class="mt-auto p-4 text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-orange-100">
 <span id="realtime-dot" class="w-2 h-2 rounded-full bg-gray-300"></span> <span id="realtime-label">กำลังเชื่อมต่อ...</span>
@@ -96,7 +102,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <section id="page-tables" class="page space-y-4 max-w-4xl mx-auto">
 <div class="flex justify-between items-center">
   <p class="text-xs text-gray-500">แตะที่โต๊ะเพื่อเริ่มสั่งเมนู หรือกดไอคอนดินสอเพื่อแก้ไขชื่อ</p>
-  <button onclick="openTableModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap">+ เพิ่มโต๊ะ</button>
+  <button onclick="openTableModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap owner-only">+ เพิ่มโต๊ะ</button>
 </div>
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="tables-grid"></div>
 </section>
@@ -132,7 +138,7 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <section id="page-stock" class="page space-y-3 max-w-4xl mx-auto">
 <div class="flex justify-between items-center mb-2">
   <p class="text-xs text-gray-500">รายการเมนูทั้งหมดในระบบ</p>
-  <button onclick="openProductModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap">+ เพิ่มเมนู</button>
+  <button onclick="openProductModal()" class="bg-orange-500 text-white text-xs px-3 py-1.5 rounded-full font-bold tap owner-only">+ เพิ่มเมนู</button>
 </div>
 <div id="stock-products-list" class="space-y-2"></div>
 </section>
@@ -146,11 +152,11 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
   <div>
     <h2 class="font-bold text-gray-800 text-base" id="profile-shop-name">ร้านค้าของฉัน</h2>
     <p class="text-xs text-gray-400">ระบบ POS จัดการร้านค้า</p>
-    <span class="inline-block mt-1 text-[10px] bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">เปิดใช้งานระบบอยู่</span>
+    <span id="profile-role-badge" class="inline-block mt-1 text-[10px] bg-orange-100 text-orange-700 font-semibold px-2 py-0.5 rounded-full">สิทธิ์การใช้งาน: เจ้าของร้าน</span>
   </div>
 </div>
 
-<div class="bg-white rounded-2xl shadow-sm border border-orange-100 divide-y divide-gray-100">
+<div class="bg-white rounded-2xl shadow-sm border border-orange-100 divide-y divide-gray-100 owner-only">
   <div onclick="goPage('admin-shop')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-orange-50 rounded-t-2xl">
     <div class="flex items-center gap-3">
       <span class="text-orange-500"><i data-lucide="qr-code" class="w-5 h-5"></i></span>
@@ -187,6 +193,10 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
     <span class="text-gray-300 text-sm">›</span>
   </div>
 </div>
+
+<button onclick="showLoginModal()" class="w-full py-3 bg-red-50 text-red-600 rounded-2xl font-bold text-sm tap flex items-center justify-center gap-2">
+  <i data-lucide="log-out" class="w-4 h-4"></i> สลับผู้ใช้งาน / เข้าสู่ระบบใหม่
+</button>
 </section>
 
 <!-- ============ ORDER DETAIL FOR A TABLE ============ -->
@@ -299,17 +309,17 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
     <span class="text-[11px] mt-1 font-medium">โต๊ะ</span>
   </button>
 
-  <button onclick="switchTab('tab-history')" id="btn-tab-history" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-history')" id="btn-tab-history" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none owner-only">
     <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
     <span class="text-[11px] mt-1 font-medium">ยอดขาย</span>
   </button>
 
-  <button onclick="switchTab('tab-stock')" id="btn-tab-stock" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-stock')" id="btn-tab-stock" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none owner-only">
     <i data-lucide="package" class="w-5 h-5"></i>
     <span class="text-[11px] mt-1 font-medium">คลังสินค้า</span>
   </button>
 
-  <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+  <button onclick="switchTab('tab-profile')" id="btn-tab-profile" class="nav-btn flex flex-col items-center text-gray-500 hover:text-orange-600 focus:outline-none owner-only">
     <i data-lucide="user" class="w-5 h-5"></i>
     <span class="text-[11px] mt-1 font-medium">โปรไฟล์</span>
   </button>
@@ -333,6 +343,94 @@ const SUPABASE_URL = 'https://pffganlqqmcpvytefcjz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmdhbmxxcW1jcHZ5dGVmY2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MDc1NjcsImV4cCI6MjEwMDM4MzU2N30.Kgm3D4Z_B-4PCINof1VC5j8dX_Z-1h0boD0lZcxaAFI';
 const BUCKET = 'pos-images';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ============================================================
+AUTH / USER ROLES SYSTEM
+============================================================ */
+// กำหนดรหัสผ่านเข้าระบบ (สามารถแก้ไขได้ตรงนี้)
+const PASSCODES = {
+  OWNER: '1234', // รหัสเจ้าของร้าน
+  STAFF: '0000'  // รหัสพนักงาน
+};
+
+let currentUserRole = localStorage.getItem('pos_user_role') || null;
+
+function applyRolePermissions() {
+  if (!currentUserRole) {
+    showLoginModal();
+    return;
+  }
+  
+  const isOwner = currentUserRole === 'owner';
+  
+  // แสดง / ซ่อน เมนูสำหรับเจ้าของร้าน
+  document.querySelectorAll('.owner-only').forEach(el => {
+    if (isOwner) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  // อัปเดตป้ายสถานะสิทธิ์
+  const roleText = isOwner ? 'เจ้าของร้าน' : 'พนักงานร้าน';
+  const roleBadgeClass = isOwner ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
+
+  const badgeHeader = document.getElementById('user-role-badge');
+  if(badgeHeader) {
+    badgeHeader.textContent = roleText;
+    badgeHeader.className = `text-xs font-bold px-2.5 py-1 rounded-full ${roleBadgeClass}`;
+  }
+
+  const drawerStatus = document.getElementById('drawer-user-status');
+  if(drawerStatus) drawerStatus.textContent = 'สถานะ: ' + roleText;
+
+  const profileBadge = document.getElementById('profile-role-badge');
+  if(profileBadge) {
+    profileBadge.textContent = 'สิทธิ์การใช้งาน: ' + roleText;
+    profileBadge.className = `inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleBadgeClass}`;
+  }
+
+  // หากเป็นพนักงาน แล้วอยู่หน้าสำหรับเจ้าของร้าน ให้เด้งกลับไปหน้าแรก
+  if (!isOwner && ['history', 'stock', 'profile', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(currentPage)) {
+    switchTab('tab-home');
+  }
+}
+
+function showLoginModal() {
+  closeDrawer();
+  Swal.fire({
+    title: 'กรุณาเข้าสู่ระบบ',
+    text: 'ใส่รหัสผ่านเจ้าของร้าน (1234) หรือ พนักงาน (0000)',
+    input: 'password',
+    inputAttributes: {
+      autocapitalize: 'off',
+      autocorrect: 'off',
+      placeholder: 'กรอก PIN / Passcode'
+    },
+    showCancelButton: false,
+    confirmButtonText: 'ตกลง',
+    confirmButtonColor: '#f97316',
+    allowOutsideClick: false,
+    preConfirm: (pass) => {
+      if (pass === PASSCODES.OWNER) {
+        return 'owner';
+      } else if (pass === PASSCODES.STAFF) {
+        return 'staff';
+      } else {
+        Swal.showValidationMessage('รหัสผ่านไม่ถูกต้อง');
+        return false;
+      }
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      currentUserRole = result.value;
+      localStorage.setItem('pos_user_role', currentUserRole);
+      toast('เข้าสู่ระบบสำเร็จในสิทธิ์: ' + (currentUserRole==='owner'?'เจ้าของร้าน':'พนักงาน'));
+      applyRolePermissions();
+    }
+  });
+}
 
 /* ============================================================
 STATE
@@ -368,30 +466,6 @@ const titles = {
 };
 let currentPage = 'home';
 
-function updateNavStyle(pageName) {
-  const reverseMap = {
-    'home': 'tab-home',
-    'tables': 'tab-tables',
-    'history': 'tab-history',
-    'stock': 'tab-stock',
-    'profile': 'tab-profile'
-  };
-  
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('text-orange-600');
-    btn.classList.add('text-gray-500');
-  });
-
-  const activeTabId = reverseMap[pageName];
-  if(activeTabId) {
-    const activeBtn = document.getElementById('btn-' + activeTabId);
-    if(activeBtn) {
-      activeBtn.classList.remove('text-gray-500');
-      activeBtn.classList.add('text-orange-600');
-    }
-  }
-}
-
 function switchTab(tabId) {
   const pageMap = {
     'tab-home': 'home',
@@ -403,9 +477,26 @@ function switchTab(tabId) {
   
   const pageName = pageMap[tabId] || 'home';
   goPage(pageName);
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('text-orange-600');
+    btn.classList.add('text-gray-500');
+  });
+  
+  const activeBtn = document.getElementById('btn-' + tabId);
+  if(activeBtn) {
+    activeBtn.classList.remove('text-gray-500');
+    activeBtn.classList.add('text-orange-600');
+  }
 }
 
 function goPage(p){
+  // บล็อกการเข้าถึงหน้าเจ้าของร้านสำหรับพนักงาน
+  if (currentUserRole !== 'owner' && ['history', 'stock', 'profile', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(p)) {
+    toast('หน้านี้เฉพาะเจ้าของร้านเท่านั้น');
+    return;
+  }
+
   currentPage = p;
   document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
   
@@ -414,7 +505,6 @@ function goPage(p){
   
   document.getElementById('header-title').textContent = titles[p] || '';
   closeDrawer();
-  updateNavStyle(p);
   renderCurrentPageContent();
   updateCartBar();
   window.scrollTo(0,0);
@@ -574,7 +664,6 @@ function openAddonPickModal(product, groups){
   const selections = {};
   groups.forEach(g=>selections[g.id]={});
   let qty = 1;
-  let savedNote = '';
 
   function optionsHtml(g){
     const opts = state.addonOptions.filter(o=>String(o.group_id)===String(g.id)).sort((a,b)=>a.sort_order-b.sort_order);
@@ -606,12 +695,7 @@ function openAddonPickModal(product, groups){
         + '<div class="flex flex-col gap-1.5 mt-2">'+optionsHtml(g)+'</div></div>';
     }).join('');
   }
-  function saveCurrentNote(){
-    const el = document.getElementById('addon-note-input');
-    if(el) savedNote = el.value;
-  }
   function render(){
-    saveCurrentNote();
     const img = product.image_url ? '<img src="'+product.image_url+'" class="w-full h-full object-cover">' : '<i data-lucide="image" class="w-8 h-8 text-orange-200"></i>';
     document.getElementById('generic-modal-body').innerHTML =
       '<div class="flex items-center justify-between mb-3">'
@@ -629,8 +713,6 @@ function openAddonPickModal(product, groups){
       + '<label class="flex items-center gap-2 text-xs font-semibold text-gray-600"><input type="checkbox" id="addon-print-input" '+(state.shopSettings && state.shopSettings.auto_print ? 'checked':'')+'> พิมพ์ออเดอร์นี้</label>'
       + '</div>'
       + '<button onclick="confirmAddToCart(\''+product.id+'\')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">เพิ่มลงตะกร้า</button>';
-    
-    if(savedNote) document.getElementById('addon-note-input').value = savedNote;
     lucide.createIcons();
   }
   window.adjQty = (d)=>{ qty = Math.max(1, qty+d); document.getElementById('addon-qty-main').textContent = qty; };
@@ -751,8 +833,9 @@ function renderTables(){
     const total = items.reduce((s,i)=> s + itemLineTotal(i), 0);
     const busy = items.length>0;
     const statusLine = busy ? (items.length+' รายการ • '+money(total)) : 'ว่าง';
+    const editBtn = currentUserRole === 'owner' ? '<button onclick="event.stopPropagation(); openTableModal(\''+t.id+'\')" class="absolute top-2 right-2 p-1.5 bg-orange-50 rounded-full"><i data-lucide="pencil" class="w-3.5 h-3.5 text-gray-500"></i></button>' : '';
     return '<div class="relative bg-white rounded-2xl border '+(busy?'border-orange-300 bg-orange-50/20':'border-orange-100')+' shadow-sm p-3 tap cursor-pointer" onclick="selectTable(\''+t.id+'\')">'
-      + '<button onclick="event.stopPropagation(); openTableModal(\''+t.id+'\')" class="absolute top-2 right-2 p-1.5 bg-orange-50 rounded-full"><i data-lucide="pencil" class="w-3.5 h-3.5 text-gray-500"></i></button>'
+      + editBtn
       + '<p class="font-bold text-sm mt-1">'+escapeHtml(t.name)+'</p>'
       + '<p class="text-[11px] mt-1 '+(busy?'text-orange-600 font-bold':'text-green-600')+'">'+statusLine+'</p></div>';
   }).join('') || '<p class="col-span-full text-center text-gray-400 py-8 text-sm">ยังไม่มีโต๊ะ กด + เพิ่มโต๊ะได้เลย</p>';
@@ -936,6 +1019,7 @@ document.addEventListener('click', e=>{
   }
 });
 async function renderDashboard(){
+  if (currentUserRole !== 'owner') return;
   const {data: paidOrders} = await sb.from('orders').select('*').eq('status','paid').order('closed_at');
   const orders = paidOrders || [];
   const range = state.dashboardRange;
@@ -973,6 +1057,7 @@ async function renderDashboard(){
 STOCK PAGE
 ============================================================ */
 function renderStock(){
+  if (currentUserRole !== 'owner') return;
   const list = document.getElementById('stock-products-list');
   list.innerHTML = state.products.map(p=>{
     const cat = state.categories.find(c=>String(c.id)===String(p.category_id));
@@ -1279,6 +1364,7 @@ INIT
 (async function init(){
   await fetchAll();
   setupRealtime();
+  applyRolePermissions();
   switchTab('tab-home');
 })();
 </script>
