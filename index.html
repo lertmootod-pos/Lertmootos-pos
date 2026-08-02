@@ -132,14 +132,96 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="tables-grid"></div>
 </section>
 
-<!-- ============ PAGE 3: HISTORY / DASHBOARD ============ -->
+<!-- ============ PAGE 3: HISTORY / DASHBOARD (แก้ไข & เพิ่มเติม) ============ -->
 <section id="page-history" class="page space-y-4 max-w-4xl mx-auto">
-<div class="flex gap-2" id="range-tabs">
-<button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold">รายวัน</button>
-<button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายสัปดาห์</button>
-<button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายเดือน</button>
-<button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold">รายปี</button>
+<!-- [ใหม่] กล่องสรุปยอดขายของวันนี้ -->
+<div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-4 text-white shadow-md">
+  <div class="flex justify-between items-center mb-2">
+    <p class="text-xs font-semibold opacity-90">☀️ สรุปยอดขายวันนี้ (Today)</p>
+    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full" id="stat-today-date">-</span>
+  </div>
+  <div class="grid grid-cols-3 gap-2 text-center mt-2">
+    <div class="bg-white/10 rounded-xl p-2 backdrop-blur-sm">
+      <p class="text-[10px] opacity-80">ยอดขายวันนี้</p>
+      <p class="font-bold text-base sm:text-lg" id="stat-today-total">฿0</p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-2 backdrop-blur-sm">
+      <p class="text-[10px] opacity-80">บิลวันนี้</p>
+      <p class="font-bold text-base sm:text-lg" id="stat-today-orders">0</p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-2 backdrop-blur-sm">
+      <p class="text-[10px] opacity-80">เฉลี่ย/บิล</p>
+      <p class="font-bold text-base sm:text-lg" id="stat-today-avg">฿0</p>
+    </div>
+  </div>
 </div>
+
+<div class="flex gap-2 overflow-x-auto hide-scrollbar py-1" id="range-tabs">
+<button data-range="day" class="range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold shrink-0">รายวัน</button>
+<button data-range="week" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold shrink-0">รายสัปดาห์</button>
+<button data-range="month" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold shrink-0">รายเดือน</button>
+<button data-range="year" class="range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold shrink-0">รายปี</button>
+</div>
+
+<!-- [ใหม่] เครื่องมือเปรียบเทียบรายวัน / รายเดือน เลือกช่วงเวลาเองได้ -->
+<div class="bg-white rounded-2xl border border-orange-100 p-3 shadow-sm space-y-3">
+  <div class="flex justify-between items-center cursor-pointer" onclick="toggleComparePanel()">
+    <span class="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+      <i data-lucide="git-compare" class="w-4 h-4 text-orange-500"></i> เปรียบเทียบยอดขาย (กำหนดช่วงเอง)
+    </span>
+    <i data-lucide="chevron-down" id="compare-arrow" class="w-4 h-4 text-gray-400 transition-transform"></i>
+  </div>
+  
+  <div id="compare-panel" class="hidden space-y-3 pt-2 border-t border-gray-100">
+    <div class="flex gap-2 text-xs">
+      <button onclick="setCompareMode('daily')" id="cmp-mode-daily" class="px-3 py-1 bg-orange-100 text-orange-700 font-bold rounded-lg">เทียบรายวัน</button>
+      <button onclick="setCompareMode('monthly')" id="cmp-mode-monthly" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg">เทียบรายเดือน</button>
+    </div>
+    
+    <!-- ฟอร์มเลือกเทียบรายวัน -->
+    <div id="cmp-daily-inputs" class="grid grid-cols-2 gap-2 text-xs">
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">วันที่ 1 (วันหลัก)</label>
+        <input type="date" id="cmp-date-1" class="w-full border border-orange-100 rounded-lg p-2 text-xs">
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">วันที่ 2 (วันเปรียบเทียบ)</label>
+        <input type="date" id="cmp-date-2" class="w-full border border-orange-100 rounded-lg p-2 text-xs">
+      </div>
+    </div>
+
+    <!-- ฟอร์มเลือกเทียบรายเดือน -->
+    <div id="cmp-monthly-inputs" class="hidden grid grid-cols-2 gap-2 text-xs">
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">เดือนที่ 1 (เดือนหลัก)</label>
+        <input type="month" id="cmp-month-1" class="w-full border border-orange-100 rounded-lg p-2 text-xs">
+      </div>
+      <div>
+        <label class="text-[10px] text-gray-400 block mb-1">เดือนที่ 2 (เดือนเทียบ)</label>
+        <input type="month" id="cmp-month-2" class="w-full border border-orange-100 rounded-lg p-2 text-xs">
+      </div>
+    </div>
+
+    <button onclick="executeComparison()" class="w-full py-2 bg-orange-500 text-white font-bold rounded-lg text-xs tap">ประมวลผลเปรียบเทียบ</button>
+
+    <!-- กล่องแสดงผลลัพธ์การเปรียบเทียบ -->
+    <div id="cmp-result" class="hidden bg-orange-50/50 p-3 rounded-xl border border-orange-100 text-xs space-y-2">
+      <div class="flex justify-between items-center">
+        <span id="cmp-lbl-1" class="text-gray-500">-</span>
+        <span id="cmp-val-1" class="font-bold text-gray-800">฿0</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span id="cmp-lbl-2" class="text-gray-500">-</span>
+        <span id="cmp-val-2" class="font-bold text-gray-800">฿0</span>
+      </div>
+      <div class="pt-2 border-t border-orange-200 flex justify-between items-center font-bold">
+        <span>ผลต่างการเติบโต</span>
+        <span id="cmp-diff-badge" class="px-2 py-0.5 rounded-full text-[11px]">-</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="grid grid-cols-3 gap-3">
 <div class="bg-white rounded-2xl border border-orange-100 p-3 text-center shadow-sm">
 <p class="text-[11px] text-gray-400">ยอดขายรวม</p>
@@ -156,6 +238,19 @@ class="w-full bg-white pl-11 pr-4 py-3 rounded-full text-sm font-medium border b
 </div>
 <div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm">
 <canvas id="sales-chart" height="220"></canvas>
+</div>
+
+<!-- [ใหม่] ส่วนเมนูขายดี เรียงลำดับอยู่ข้างล่างกราฟ -->
+<div class="bg-white rounded-2xl border border-orange-100 p-4 shadow-sm space-y-3">
+  <div class="flex justify-between items-center">
+    <h3 class="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+      🏆 อันดับเมนูขายดี (Top Sellers)
+    </h3>
+    <span class="text-[10px] text-gray-400">เรียงตามจำนวนที่ขายได้</span>
+  </div>
+  <div id="best-sellers-list" class="space-y-2">
+    <!-- รายการสินค้าขายดีจะแสดงผ่าน JS -->
+  </div>
 </div>
 </section>
 
@@ -387,7 +482,6 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ============================================================
 AUTH / USER ROLES SYSTEM
 ============================================================ */
-// โหลดรหัสผ่านจาก localStorage ถ้ามี หรือใช้ค่าเริ่มต้น
 function getPasscodes() {
   return {
     OWNER: localStorage.getItem('pos_pass_owner') || '1234',
@@ -397,7 +491,6 @@ function getPasscodes() {
 
 let currentUserRole = localStorage.getItem('pos_user_role') || null;
 
-// ตรวจสอบการสิทธิ์เปิดใช้งานระบบ
 function checkAuth() {
   const mainWrapper = document.getElementById('main-app-wrapper');
   if (!currentUserRole) {
@@ -413,7 +506,6 @@ function checkAuth() {
   }
 }
 
-// จัดการการเข้ารหัสผ่านหน้า login แยก
 function handleSeparateLogin() {
   const passInput = document.getElementById('login-passcode-input');
   const pass = passInput ? passInput.value.trim() : '';
@@ -443,7 +535,6 @@ function applyRolePermissions() {
   
   const isOwner = currentUserRole === 'owner';
   
-  // แสดง / ซ่อน เมนูสำหรับเจ้าของร้าน
   document.querySelectorAll('.owner-only').forEach(el => {
     if (isOwner) {
       el.classList.remove('hidden');
@@ -452,7 +543,6 @@ function applyRolePermissions() {
     }
   });
 
-  // อัปเดตป้ายสถานะสิทธิ์
   const roleText = isOwner ? 'เจ้าของร้าน' : 'พนักงานร้าน';
   const roleBadgeClass = isOwner ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700';
 
@@ -471,7 +561,6 @@ function applyRolePermissions() {
     profileBadge.className = `inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${roleBadgeClass}`;
   }
 
-  // หากเป็นพนักงาน แล้วอยู่หน้าสำหรับเจ้าของร้าน ให้เด้งกลับไปหน้าแรก
   if (!isOwner && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(currentPage)) {
     switchTab('tab-home');
   }
@@ -580,7 +669,8 @@ STATE
 let state = {
   categories: [], products: [], addonGroups: [], addonOptions: [], productAddonGroups: [],
   tablesList: [], openOrders: [], orderItems: [], orderItemAddons: [], shopSettings: null,
-  currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day'
+  currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day',
+  compareMode: 'daily' // [ใหม่] โหมดเปรียบเทียบ: 'daily' หรือ 'monthly'
 };
 let localAddonOptions = [];
 
@@ -633,7 +723,6 @@ function switchTab(tabId) {
 }
 
 function goPage(p){
-  // บล็อกการเข้าถึงหน้าเจ้าของร้านสำหรับพนักงาน
   if (currentUserRole !== 'owner' && ['history', 'stock', 'admin-categories', 'admin-products', 'admin-addons', 'admin-tables', 'admin-shop'].includes(p)) {
     toast('หน้านี้เฉพาะเจ้าของร้านเท่านั้น');
     return;
@@ -1148,18 +1237,46 @@ function printReceipt(){
 }
 
 /* ============================================================
-HISTORY / DASHBOARD
+HISTORY / DASHBOARD (แก้ไข & ปรับปรุงฟังก์ชันทั้งหมด)
 ============================================================ */
 let chartInstance = null;
 document.addEventListener('click', e=>{
   const btn = e.target.closest('.range-btn');
   if(btn){
-    document.querySelectorAll('.range-btn').forEach(b=>{ b.className='range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold'; });
-    btn.className = 'range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold';
+    document.querySelectorAll('.range-btn').forEach(b=>{ b.className='range-btn px-4 py-2 bg-white border border-orange-100 rounded-full text-xs font-semibold shrink-0'; });
+    btn.className = 'range-btn px-4 py-2 bg-orange-500 text-white rounded-full text-xs font-bold shrink-0';
     state.dashboardRange = btn.dataset.range;
     renderDashboard();
   }
 });
+
+function toggleComparePanel(){
+  const panel = document.getElementById('compare-panel');
+  const arrow = document.getElementById('compare-arrow');
+  panel.classList.toggle('hidden');
+  arrow.classList.toggle('rotate-180');
+}
+
+function setCompareMode(mode){
+  state.compareMode = mode;
+  const dBtn = document.getElementById('cmp-mode-daily');
+  const mBtn = document.getElementById('cmp-mode-monthly');
+  const dInp = document.getElementById('cmp-daily-inputs');
+  const mInp = document.getElementById('cmp-monthly-inputs');
+
+  if(mode === 'daily'){
+    dBtn.className = 'px-3 py-1 bg-orange-100 text-orange-700 font-bold rounded-lg';
+    mBtn.className = 'px-3 py-1 bg-gray-100 text-gray-600 rounded-lg';
+    dInp.classList.remove('hidden');
+    mInp.classList.add('hidden');
+  } else {
+    mBtn.className = 'px-3 py-1 bg-orange-100 text-orange-700 font-bold rounded-lg';
+    dBtn.className = 'px-3 py-1 bg-gray-100 text-gray-600 rounded-lg';
+    mInp.classList.remove('hidden');
+    dInp.classList.add('hidden');
+  }
+}
+
 async function renderDashboard(){
   if (currentUserRole !== 'owner') return;
   const {data: paidOrders} = await sb.from('orders').select('*').eq('status','paid').order('closed_at');
@@ -1167,6 +1284,19 @@ async function renderDashboard(){
   const range = state.dashboardRange;
   let buckets = [];
   const now = new Date();
+
+  // [ใหม่] 1. คำนวณสรุปยอดขายเฉพาะวันนี้
+  const todayStr = now.toDateString();
+  const todayOrders = orders.filter(o => new Date(o.closed_at || o.created_at).toDateString() === todayStr);
+  const todayTotal = todayOrders.reduce((s,o) => s + Number(o.total), 0);
+  
+  const todayDateLbl = document.getElementById('stat-today-date');
+  if(todayDateLbl) todayDateLbl.textContent = now.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+  document.getElementById('stat-today-total').textContent = money(todayTotal);
+  document.getElementById('stat-today-orders').textContent = todayOrders.length;
+  document.getElementById('stat-today-avg').textContent = money(todayOrders.length ? Math.round(todayTotal / todayOrders.length) : 0);
+
+  // 2. คำนวณตามช่วงเวลาสำหรับกราฟ
   function fmtDay(d){ return d.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit'}); }
   if(range==='day'){
     for(let i=13;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); buckets.push({key:d.toDateString(), label:fmtDay(d), total:0}); }
@@ -1182,10 +1312,12 @@ async function renderDashboard(){
     for(let i=4;i>=0;i--){ const y=now.getFullYear()-i; buckets.push({key:''+y, label:''+y, total:0}); }
     orders.forEach(o=>{ const d=new Date(o.closed_at||o.created_at); const key=''+d.getFullYear(); const b=buckets.find(x=>x.key===key); if(b) b.total+=Number(o.total); });
   }
+
   const grandTotal = orders.reduce((s,o)=>s+Number(o.total),0);
   document.getElementById('stat-total').textContent = money(grandTotal);
   document.getElementById('stat-orders').textContent = orders.length;
   document.getElementById('stat-avg').textContent = money(orders.length?Math.round(grandTotal/orders.length):0);
+  
   const ctx = document.getElementById('sales-chart');
   if(chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
@@ -1193,6 +1325,141 @@ async function renderDashboard(){
     data:{ labels: buckets.map(b=>b.label), datasets:[{ label:'ยอดขาย (฿)', data: buckets.map(b=>b.total), backgroundColor:'#f97316', borderRadius:6 }] },
     options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
   });
+
+  // [ใหม่] 3. คำนวณและแสดงผลอันดับเมนูขายดี
+  renderBestSellers(paidOrders || []);
+}
+
+// [ใหม่] ฟังก์ชันคำนวณเปรียบเทียบยอดขาย
+async function executeComparison(){
+  const {data: paidOrders} = await sb.from('orders').select('*').eq('status','paid');
+  const orders = paidOrders || [];
+
+  let val1 = 0, val2 = 0;
+  let lbl1 = '', lbl2 = '';
+
+  if(state.compareMode === 'daily'){
+    const d1 = document.getElementById('cmp-date-1').value;
+    const d2 = document.getElementById('cmp-date-2').value;
+
+    if(!d1 || !d2){ toast('กรุณาเลือกวันที่ต้องการเปรียบเทียบให้ครบ'); return; }
+
+    const date1 = new Date(d1).toDateString();
+    const date2 = new Date(d2).toDateString();
+
+    lbl1 = 'วันที่ ' + new Date(d1).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+    lbl2 = 'วันที่ ' + new Date(d2).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+
+    val1 = orders.filter(o => new Date(o.closed_at || o.created_at).toDateString() === date1).reduce((s,o)=>s+Number(o.total), 0);
+    val2 = orders.filter(o => new Date(o.closed_at || o.created_at).toDateString() === date2).reduce((s,o)=>s+Number(o.total), 0);
+  } else {
+    const m1 = document.getElementById('cmp-month-1').value; // YYYY-MM
+    const m2 = document.getElementById('cmp-month-2').value;
+
+    if(!m1 || !m2){ toast('กรุณาเลือกเดือนที่ต้องการเปรียบเทียบให้ครบ'); return; }
+
+    lbl1 = 'เดือน ' + new Date(m1 + '-01').toLocaleDateString('th-TH',{month:'short',year:'2-digit'});
+    lbl2 = 'เดือน ' + new Date(m2 + '-01').toLocaleDateString('th-TH',{month:'short',year:'2-digit'});
+
+    val1 = orders.filter(o => {
+      const d = new Date(o.closed_at || o.created_at);
+      const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      return ym === m1;
+    }).reduce((s,o)=>s+Number(o.total), 0);
+
+    val2 = orders.filter(o => {
+      const d = new Date(o.closed_at || o.created_at);
+      const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      return ym === m2;
+    }).reduce((s,o)=>s+Number(o.total), 0);
+  }
+
+  // คำนวณ % การเติบโต
+  let diffPercent = 0;
+  let badgeHtml = '';
+  if(val1 === 0){
+    diffPercent = val2 > 0 ? 100 : 0;
+  } else {
+    diffPercent = ((val2 - val1) / val1) * 100;
+  }
+
+  if(diffPercent > 0){
+    badgeHtml = `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full">+${diffPercent.toFixed(1)}% 📈</span>`;
+  } else if(diffPercent < 0){
+    badgeHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full">${diffPercent.toFixed(1)}% 📉</span>`;
+  } else {
+    badgeHtml = `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">0.0% =</span>`;
+  }
+
+  document.getElementById('cmp-lbl-1').textContent = lbl1;
+  document.getElementById('cmp-val-1').textContent = money(val1);
+  document.getElementById('cmp-lbl-2').textContent = lbl2;
+  document.getElementById('cmp-val-2').textContent = money(val2);
+  document.getElementById('cmp-diff-badge').innerHTML = badgeHtml;
+
+  document.getElementById('cmp-result').classList.remove('hidden');
+}
+
+// [ใหม่] ฟังก์ชันคำนวณเรียงลำดับเมนูขายดี
+async function renderBestSellers(paidOrders){
+  const paidOrderIds = paidOrders.map(o => o.id);
+  const bestList = document.getElementById('best-sellers-list');
+
+  if(paidOrderIds.length === 0){
+    bestList.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">ยังไม่มีข้อมูลการขาย</p>';
+    return;
+  }
+
+  // ดึงรายการ order_items ที่จ่ายเงินแล้วทั้งหมด
+  const { data: allItems } = await sb.from('order_items').select('*').in('order_id', paidOrderIds).eq('cancelled', false);
+  const items = allItems || [];
+
+  // รวบรวมยอดขายตามชื่อสินค้า
+  const salesMap = {};
+  items.forEach(i => {
+    const name = i.product_name;
+    const qty = Number(i.qty || 0);
+    const total = Number(i.unit_price || 0) * qty;
+
+    if(!salesMap[name]){
+      salesMap[name] = { qty: 0, total: 0 };
+    }
+    salesMap[name].qty += qty;
+    salesMap[name].total += total;
+  });
+
+  // แปลงเป็น Array แล้วเรียงจากขายดีสุดไปน้อยสุด
+  const sorted = Object.keys(salesMap).map(key => ({
+    name: key,
+    qty: salesMap[key].qty,
+    total: salesMap[key].total
+  })).sort((a,b) => b.qty - a.qty);
+
+  if(sorted.length === 0){
+    bestList.innerHTML = '<p class="text-center text-gray-400 text-xs py-4">ยังไม่มีข้อมูลการขาย</p>';
+    return;
+  }
+
+  // แสดงผล 5 อันดับแรก
+  const topSellers = sorted.slice(0, 5);
+  bestList.innerHTML = topSellers.map((item, index) => {
+    let rankBadge = '';
+    if(index === 0) rankBadge = '<span class="w-6 h-6 rounded-full bg-amber-400 text-white font-bold text-xs flex items-center justify-center shrink-0">1</span>';
+    else if(index === 1) rankBadge = '<span class="w-6 h-6 rounded-full bg-slate-300 text-gray-700 font-bold text-xs flex items-center justify-center shrink-0">2</span>';
+    else if(index === 2) rankBadge = '<span class="w-6 h-6 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shrink-0">3</span>';
+    else rankBadge = `<span class="w-6 h-6 rounded-full bg-gray-100 text-gray-500 font-bold text-xs flex items-center justify-center shrink-0">${index + 1}</span>`;
+
+    return `<div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl text-xs">
+      <div class="flex items-center gap-2.5 min-w-0">
+        ${rankBadge}
+        <span class="font-semibold text-gray-800 truncate">${escapeHtml(item.name)}</span>
+      </div>
+      <div class="text-right shrink-0">
+        <p class="font-bold text-orange-600">${item.qty} จาน/แก้ว</p>
+        <p class="text-[10px] text-gray-400">รวม ${money(item.total)}</p>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ============================================================
