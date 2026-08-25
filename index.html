@@ -793,6 +793,18 @@ async function uploadProfilePic(input) {
 
 function showLoginModal() { closeDrawer(); logout(); }
 function logout() { localStorage.removeItem('pos_user_role'); currentUserRole = null; toast(appLang==='en'?'Logged out':'ออกจากระบบเรียบร้อยแล้ว'); checkAuth(); }
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    // หาปุ่ม "เข้าสู่ระบบ" สีส้มในหน้าจอของคุณโดยตรง
+    const loginBtn = document.querySelector('button.btn, button, input[type="submit"]'); 
+    // หรือถ้าปุ่มมี onclick ที่เรียกฟังก์ชันล็อกอิน ให้ลองจำลองการคลิกดูครับ
+    const customLoginBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('เข้าสู่ระบบ'));
+    
+    if (customLoginBtn) {
+      customLoginBtn.click();
+    }
+  }
+});
  
 function showChangePasscodeModal() {
   const isOwner = currentUserRole === 'owner';
