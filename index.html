@@ -850,6 +850,7 @@ function renderCurrentPageContent(){
   if(currentPage==='profile') { 
     document.getElementById('profile-shop-name').textContent = (state.shopSettings||{}).shop_name || 'ร้านค้าของฉัน'; 
     loadProfileDetails();
+      loadProfilePic();
   }
   if(currentPage==='admin-printer') loadPrinterSettings();
   if(currentPage==='admin-categories') renderAdminCategories();
