@@ -1005,24 +1005,36 @@ function openAddonPickModal(product, groups){
       const optsHtml = opts.map(o=>{
         const picked = selections[g.id][o.id] || 0; const priceLabel = o.price_delta ? (o.price_delta>0?'+':'') + money(o.price_delta) : '';
         if(o.allow_qty) return '<div class="flex items-center justify-between text-sm py-1.5 px-2 rounded-lg' + (picked>0?' bg-orange-50':'') + '"><span>' + escapeHtml(o.name) + ' <span class="text-orange-500 font-semibold">' + priceLabel + '</span></span><span class="flex items-center gap-2"><button type="button" class="stepper-btn" onclick="addonQtyChange(\'' + g.id + '\',\'' + o.id + '\',-1)">-</button><span class="w-5 text-center font-bold">' + picked + '</span><button type="button" class="stepper-btn" onclick="addonQtyChange(\'' + g.id + '\',\'' + o.id + '\',1)">+</button></span></div>';
-        const priceVal = o.price || 0;
+        const isSingleSelect = Number(g.max_select) === 1;
+        const priceVal = Number(o.price) || 0;
         const displayPrice = picked > 0 ? priceVal * picked : priceVal;
-        
-        return '<div class="flex items-center justify-between text-sm py-2 px-2.5 rounded-xl ' + (picked > 0 ? 'bg-orange-50' : 'hover:bg-gray-50') + '">' +
+
+        return '<div class="flex items-center justify-between text-sm py-2 px-2.5 rounded-xl transition-colors ' + (picked > 0 ? 'bg-orange-50/60' : 'hover:bg-gray-50') + '">' +
           '<!-- 1. Checkbox + ชื่อตัวเลือก -->' +
           '<label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0 pr-2">' +
-            '<input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer shrink-0" ' + (picked > 0 ? 'checked' : '') + ' onchange="addonToggle(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', this.checked)">' +
+            '<input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer shrink-0" ' + 
+              (picked > 0 ? 'checked' : '') + 
+              ' onchange="addonToggle(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', this.checked)">' +
             '<span class="font-medium text-gray-800 truncate">' + escapeHtml(o.name) + '</span>' +
           '</label>' +
-          '<!-- 2. ปุ่มบวกลบจำนวน + 3. ราคาริมขวาสุด -->' +
+
+          '<!-- 2. ปุ่มบวกลบ (ซ่อนถ้าเลือกได้ 1 อย่าง) + 3. ราคาริมขวาสุด -->' +
           '<div class="flex items-center gap-3 shrink-0">' +
-            '<div class="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-2 py-0.5 shadow-sm">' +
-              '<button type="button" class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', -1)">-</button>' +
-              '<span class="w-4 text-center text-xs font-bold text-gray-800">' + picked + '</span>' +
-              '<button type="button" class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', 1)">+</button>' +
-            '</div>' +
-            '<span class="w-12 text-right text-xs font-bold text-orange-500">+฿' + displayPrice + '</span>' +
+            (!isSingleSelect ? 
+              '<div class="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-2 py-0.5 shadow-sm">' +
+                '<button type="button" class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', -1)">-</button>' +
+                '<span class="w-4 text-center text-xs font-bold text-gray-800">' + picked + '</span>' +
+                '<button type="button" class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', 1)">+</button>' +
+              '</div>' 
+              : '') +
+            
+            '<!-- ราคารวมอัปเดตริมขวาสุด -->' +
+            '<span class="w-14 text-right text-xs font-bold text-orange-500">' + 
+              (displayPrice > 0 ? '+฿' + displayPrice : (priceVal > 0 ? '+฿' + priceVal : '')) + 
+            '</span>' +
           '</div>' +
+        '</div>';
+
         '</div>';
 
       }).join('');
