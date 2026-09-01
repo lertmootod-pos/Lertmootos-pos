@@ -1105,26 +1105,37 @@ function renderTables(){
   lucide.createIcons();
 }
 /* เปิดหน้าต่างสำหรับกรอกเลขออเดอร์เดลิเวอรี่ ก่อนเข้าสั่งเมนู */
-function openDeliveryOrderModal(tableId){
-  const order = state.openOrders.find(o=>String(o.table_id)===String(tableId));
-  document.getElementById('generic-modal-body').innerHTML = '<div class="flex items-center justify-between mb-3"><h3 class="font-bold text-lg">'+(appLang==='en'?'Delivery Order':'ออเดอร์เดลิเวอรี่')+'</h3><button onclick="closeGenericModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div><div class="space-y-3"><div><label class="text-xs font-bold text-gray-500">'+(appLang==='en'?'Order Number':'เลขออเดอร์ (พิมพ์เอง)')+'</label><input id="delivery-order-no-input" value="'+(order&&order.delivery_order_no?escapeHtml(order.delivery_order_no):'')+'" placeholder="'+(appLang==='en'?'e.g. Grab #12345':'เช่น เลขที่ออเดอร์จากแอปเดลิเวอรี่')+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1"></div></div><button onclick="confirmDeliveryOrderStart(\''+tableId+'\')" class="w-full mt-4 py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap shadow-md shadow-orange-500/20">'+(appLang==='en'?'Order':'สั่งออเดอร์')+'</button>';
-  showGenericModal(); lucide.createIcons();
-}
-async function confirmDeliveryOrderStart(tableId){
-  const orderNo = document.getElementById('delivery-order-no-input').value.trim();
-  state.pendingDeliveryOrderNo = orderNo || null;
-  const existing = state.openOrders.find(o=>String(o.table_id)===String(tableId));
-  if(existing && orderNo && existing.delivery_order_no !== orderNo){ await sb.from('orders').update({delivery_order_no: orderNo}).eq('id', existing.id); await fetchAll(); }
-  closeGenericModal(); selectTable(tableId);
-}
-function itemLineTotal(item){ return (Number(item.unit_price) + state.orderItemAddons.filter(a=>String(a.order_item_id)===String(item.id)).reduce((s,a)=>s+Number(a.price_delta)*(a.qty||1),0)) * item.qty; }
-/* ============================================================
-ต้นทุน / กำไร / เดลิเวอรี่ — คำนวณจากราคาต้นทุนของสินค้าปัจจุบัน
-============================================================ */
-function productCostPrice(productId){ const p = state.products.find(x=>String(x.id)===String(productId)); return p ? Number(p.cost_price||0) : 0; }
-function isDeliveryOrder(order){ const t = state.tablesList.find(x=>String(x.id)===String(order.table_id)); return !!(t && t.is_delivery); }
-function orderCost(order){ return state.allOrderItems.filter(i=>String(i.order_id)===String(order.id) && !i.cancelled).reduce((s,i)=> s + productCostPrice(i.product_id)*Number(i.qty), 0); }
-function summarizeOrders(orders){
+        const isSingleSelect = Number(g.max_select) === 1;
+        const priceVal = Number(o.price) || 0;
+        const displayPrice = picked > 0 ? priceVal * picked : priceVal;
+
+        return '<div class="flex items-center justify-between text-sm py-2 px-2.5 rounded-xl transition-colors ' + (picked > 0 ? 'bg-orange-50/60' : 'hover:bg-gray-50') + '">' +
+          '<!-- 1. Checkbox สี่เหลี่ยม + ชื่อตัวเลือก -->' +
+          '<label class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0 pr-2">' +
+            '<input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 cursor-pointer shrink-0" ' + 
+              (picked > 0 ? 'checked' : '') + 
+              ' onchange="addonToggle(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', this.checked)">' +
+            '<span class="font-medium text-gray-800 truncate">' + escapeHtml(o.name) + '</span>' +
+          '</label>' +
+
+          '<!-- 2. ปุ่มบวกลบ (ซ่อนถ้าเลือกได้ 1 อย่าง) + 3. ราคาริมขวาสุด -->' +
+          '<div class="flex items-center gap-3 shrink-0">' +
+            (!isSingleSelect ? 
+              '<div class="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-2 py-0.5 shadow-sm">' +
+                '<button type="button" class="w-5 h-5 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', -1)">-</button>' +
+                '<span class="w-4 text-center text-xs font-bold text-gray-800">' + picked + '</span>' +
+                '<button type="button" class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs active:scale-90" onclick="addonChangeQty(\'' + g.id + '\',\'' + o.id + '\',\'' + g.max_select + '\', 1)">+</button>' +
+              '</div>' 
+              : '') +
+            
+            '<!-- ราคารวมอัปเดตริมขวาสุด -->' +
+            '<span class="w-14 text-right text-xs font-bold text-orange-500">' + 
+              (displayPrice > 0 ? '+฿' + displayPrice : '') + 
+            '</span>' +
+          '</div>' +
+        '</div>';
+
+  function summarizeOrders(orders){
   let total=0, cost=0, delivery=0;
   orders.forEach(o=>{ const t = Number(o.total)||0; total += t; cost += orderCost(o); if(isDeliveryOrder(o)) delivery += t; });
   return { total, cost, profit: total-cost, delivery, count: orders.length };
