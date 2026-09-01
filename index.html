@@ -1738,17 +1738,23 @@ function addonChangeQty(gid, oid, maxSel, delta) {
   
   const current = curAddons[gid][oid] || 0;
   const next = current + delta;
+  const max = Number(maxSel) || 99;
   
   if (next <= 0) {
     delete curAddons[gid][oid];
   } else {
-    curAddons[gid][oid] = next;
+    if (max === 1) {
+      curAddons[gid] = { [oid]: 1 };
+    } else {
+      curAddons[gid][oid] = next;
+    }
   }
   
-  // สั่ง re-render หน้าต่าง Modal
-  const activeModal = document.getElementById('generic-modal-body');
-  if (activeModal && typeof renderProductDetailModal === 'function') {
+  // สั่ง re-render อัปเดตหน้าต่าง Modal
+  if (typeof renderProductDetailModal === 'function') {
     renderProductDetailModal();
+  } else if (typeof openProductModal === 'function' && window.currentProduct) {
+    openProductModal(window.currentProduct.id);
   }
 }
 
