@@ -7,12 +7,12 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://pffganlqqmcpvytefcjz.supabase.co/storage/v1/object/public/pos-images/logo/1785682463282_d181l1.jpeg",
+      "src": "/att.5_U9Kqp97ih1ZuYDsLHGB3IH4WjO2PVsJa1BVKdbc2M.jpeg",
       "sizes": "192x192",
       "type": "image/jpeg"
     },
     {
-      "src": "https://pffganlqqmcpvytefcjz.supabase.co/storage/v1/object/public/pos-images/logo/1785682463282_d181l1.jpeg",
+      "src": "/att.5_U9Kqp97ih1ZuYDsLHGB3IH4WjO2PVsJa1BVKdbc2M.jpeg",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
