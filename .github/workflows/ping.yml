@@ -1,0 +1,16 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # รันอัตโนมัติทุกๆ 3 วัน
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # ปุ่มสำหรับกดสั่งยิงทดสอบเอง
+
+jobs:
+  ping-db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Ping Request
+        run: |
+          curl -i -X GET 'https://pffganlqqmcpvytefcjz.supabase.co/rest/v1/' \
+          -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZmdhbmxxcW1jcHZ5dGVmY2p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4MDc1NjcsImV4cCI6MjEwMDM4MzU2N30.Kgm3D4Z_B-4PCINof1VC5j8dX_Z-1h0boD0lZcxaAFI"
