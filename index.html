@@ -124,6 +124,36 @@ body.dark-mode { background: #121212; color: #e0e0e0; }
 </section>
 
 <!-- หน้ากรอก PIN พนักงาน/เจ้าของร้าน (หลังล็อกอินอีเมลแล้ว) -->
+<!-- หน้าตั้งรหัสผ่านใหม่ (เข้าถึงผ่านลิงก์ในอีเมล "ลืมรหัสผ่าน") -->
+<section id="page-reset-password" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full">
+  <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
+    <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg shadow-orange-500/30">🔑</div>
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-gray-800">ตั้งรหัสผ่านใหม่</h2>
+      <p class="text-xs text-gray-400 mt-1">กรอกรหัสผ่านใหม่สำหรับบัญชีของคุณ</p>
+    </div>
+    <div class="space-y-3">
+      <input type="password" id="reset-password-input" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input type="password" id="reset-password-confirm-input" placeholder="ยืนยันรหัสผ่านใหม่" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <button onclick="handleResetPasswordSubmit()" class="w-full py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-sm tap shadow-md shadow-orange-500/20">บันทึกรหัสผ่านใหม่</button>
+    </div>
+  </div>
+</section>
+
+<!-- แผงควบคุมผู้ดูแลระบบกลาง (มองเห็นเฉพาะบัญชีที่อยู่ในตาราง super_admins) -->
+<section id="page-admin-panel" class="page max-w-2xl mx-auto my-auto p-4 w-full">
+  <div class="bg-white p-5 rounded-3xl shadow-md border border-orange-100">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-lg font-bold text-gray-800">แผงควบคุมผู้ดูแลระบบ</h2>
+        <p class="text-xs text-gray-400">จัดการสถานะ/วันหมดอายุของร้านค้าทั้งหมด</p>
+      </div>
+      <button onclick="closeAdminPanel()" class="text-xs bg-gray-100 text-gray-600 font-bold px-3 py-2 rounded-full tap">กลับไปหน้าร้าน</button>
+    </div>
+    <div id="admin-shops-list" class="space-y-3 max-h-[70vh] overflow-y-auto"></div>
+  </div>
+</section>
+
 <section id="page-login" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full text-center">
   <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
     <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto shadow-lg shadow-orange-500/30">
@@ -635,7 +665,7 @@ async function handleAuthSignup() {
     switchAuthTab('login');
     return;
   }
-  const { error: shopErr } = await sb.from('shops').insert({ owner_id: data.user.id, name: shopName });
+  const { error: shopErr } = await sb.from('shops').insert({ owner_id: data.user.id, name: shopName, owner_email: email });
   if (shopErr) { toast('สร้างร้านไม่สำเร็จ: ' + shopErr.message); return; }
   toast('สมัครสำเร็จ! ทดลองใช้งานฟรี 14 วัน');
   await checkSession();
@@ -653,9 +683,25 @@ async function handleAuthLogin() {
 async function handleForgotPassword() {
   const email = document.getElementById('login-email-input').value.trim();
   if (!email) return toast('กรอกอีเมลของคุณก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');
-  const { error } = await sb.auth.resetPasswordForEmail(email);
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
   if (error) return toast('ส่งลิงก์ไม่สำเร็จ: ' + error.message);
-  toast('ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว');
+  toast('ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย');
+}
+
+let isPasswordRecoveryMode = false;
+
+async function handleResetPasswordSubmit() {
+  const pass = document.getElementById('reset-password-input').value;
+  const confirm = document.getElementById('reset-password-confirm-input').value;
+  if (!pass || pass.length < 6) return toast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+  if (pass !== confirm) return toast('รหัสผ่านและการยืนยันไม่ตรงกัน');
+  const { error } = await sb.auth.updateUser({ password: pass });
+  if (error) return toast('ตั้งรหัสผ่านไม่สำเร็จ: ' + error.message);
+  isPasswordRecoveryMode = false;
+  toast('ตั้งรหัสผ่านใหม่สำเร็จแล้ว! กำลังเข้าสู่ระบบ...');
+  document.getElementById('reset-password-input').value = '';
+  document.getElementById('reset-password-confirm-input').value = '';
+  await checkSession();
 }
 
 async function handleAuthLogout() {
@@ -670,25 +716,96 @@ function renderPlanStatus() {
   const statusText = { trial: 'ทดลองใช้งาน', active: 'แพ็กเกจใช้งานปกติ', suspended: 'ถูกระงับการใช้งาน', cancelled: 'ยกเลิกการใช้งาน' }[state.shop.status] || state.shop.status;
   const expires = state.shop.expires_at ? new Date(state.shop.expires_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'}) : '-';
   el.textContent = `แพ็กเกจ: ${statusText} • หมดอายุ ${expires}`;
+  const adminBtnId = 'profile-admin-panel-btn';
+  let adminBtn = document.getElementById(adminBtnId);
+  if (state.isSuperAdmin) {
+    if (!adminBtn) {
+      adminBtn = document.createElement('button');
+      adminBtn.id = adminBtnId;
+      adminBtn.onclick = openAdminPanel;
+      adminBtn.className = 'w-full mt-2 py-2.5 bg-gray-800 text-white rounded-2xl font-bold text-xs tap';
+      adminBtn.textContent = '⚙ แผงควบคุมผู้ดูแลระบบ (ดูทุกร้าน)';
+      el.insertAdjacentElement('afterend', adminBtn);
+    }
+  } else if (adminBtn) { adminBtn.remove(); }
 }
 
 function showPage(id) {
   document.getElementById('main-app-wrapper').classList.add('hidden');
-  ['page-account-auth','page-suspended','page-login'].forEach(p => document.getElementById(p).classList.remove('active'));
+  ['page-account-auth','page-suspended','page-login','page-reset-password','page-admin-panel'].forEach(p => document.getElementById(p).classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+/* ============================================================
+ADMIN PANEL — เฉพาะบัญชีที่อยู่ในตาราง super_admins (ดู migration_admin.sql)
+============================================================ */
+function openAdminPanel() { showPage('page-admin-panel'); loadAdminShops(); }
+function closeAdminPanel() { document.getElementById('main-app-wrapper').classList.remove('hidden'); document.getElementById('page-admin-panel').classList.remove('active'); }
+
+async function loadAdminShops() {
+  const listEl = document.getElementById('admin-shops-list');
+  listEl.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">กำลังโหลด...</p>';
+  const { data: shops, error } = await sb.from('shops').select('*').order('created_at', { ascending: false });
+  if (error) { listEl.innerHTML = `<p class="text-xs text-red-500 text-center py-6">โหลดไม่สำเร็จ: ${error.message}</p>`; return; }
+  if (!shops || !shops.length) { listEl.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">ยังไม่มีร้านค้าในระบบ</p>'; return; }
+  const statusLabel = { trial: 'ทดลองใช้งาน', active: 'ใช้งานปกติ', suspended: 'ถูกระงับ', cancelled: 'ยกเลิกแล้ว' };
+  const statusColor = { trial: 'bg-blue-100 text-blue-700', active: 'bg-green-100 text-green-700', suspended: 'bg-red-100 text-red-700', cancelled: 'bg-gray-200 text-gray-600' };
+  listEl.innerHTML = shops.map(s => {
+    const expired = s.expires_at && new Date(s.expires_at) < new Date();
+    const expiresText = s.expires_at ? new Date(s.expires_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'}) : '-';
+    return `
+    <div class="border border-gray-100 rounded-2xl p-4 space-y-2">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="font-bold text-gray-800 text-sm">${escapeHtml(s.name || 'ไม่มีชื่อร้าน')}</p>
+          <p class="text-[11px] text-gray-400">${escapeHtml(s.owner_email || '-')}</p>
+        </div>
+        <span class="text-[10px] font-bold px-2 py-1 rounded-full ${statusColor[s.status] || 'bg-gray-100 text-gray-600'}">${statusLabel[s.status] || s.status}</span>
+      </div>
+      <p class="text-[11px] ${expired ? 'text-red-500 font-bold' : 'text-gray-500'}">หมดอายุ: ${expiresText} ${expired ? '(หมดอายุแล้ว)' : ''}</p>
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button onclick="adminExtendShop('${s.id}', 1)" class="text-[11px] bg-orange-50 text-orange-600 font-bold px-3 py-1.5 rounded-full tap">+1 เดือน</button>
+        <button onclick="adminExtendShop('${s.id}', 12)" class="text-[11px] bg-orange-50 text-orange-600 font-bold px-3 py-1.5 rounded-full tap">+1 ปี</button>
+        ${s.status !== 'active' ? `<button onclick="adminSetStatus('${s.id}','active')" class="text-[11px] bg-green-50 text-green-600 font-bold px-3 py-1.5 rounded-full tap">เปิดใช้งาน</button>` : ''}
+        ${s.status !== 'suspended' ? `<button onclick="adminSetStatus('${s.id}','suspended')" class="text-[11px] bg-red-50 text-red-600 font-bold px-3 py-1.5 rounded-full tap">ระงับ</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+
+async function adminExtendShop(shopId, months) {
+  const { data: shopRow } = await sb.from('shops').select('expires_at,status').eq('id', shopId).maybeSingle();
+  const base = (shopRow && shopRow.expires_at && new Date(shopRow.expires_at) > new Date()) ? new Date(shopRow.expires_at) : new Date();
+  base.setMonth(base.getMonth() + months);
+  const { error } = await sb.from('shops').update({ expires_at: base.toISOString(), status: (shopRow && shopRow.status === 'suspended') ? 'suspended' : 'active' }).eq('id', shopId);
+  if (error) return toast('อัปเดตไม่สำเร็จ: ' + error.message);
+  toast(`ต่ออายุอีก ${months} เดือนแล้ว`);
+  loadAdminShops();
+}
+
+async function adminSetStatus(shopId, status) {
+  const { error } = await sb.from('shops').update({ status }).eq('id', shopId);
+  if (error) return toast('อัปเดตไม่สำเร็จ: ' + error.message);
+  toast('อัปเดตสถานะร้านแล้ว');
+  loadAdminShops();
 }
 
 /* ตรวจสอบ session ของ Supabase Auth ทุกครั้งที่โหลดแอป / ล็อกอิน / ล็อกเอาท์ */
 async function checkSession() {
+  if (isPasswordRecoveryMode) { showPage('page-reset-password'); return; } // อยู่ระหว่างตั้งรหัสผ่านใหม่ ห้ามสลับหน้าไปไหน
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { currentAuthUser = null; showPage('page-account-auth'); return; }
   currentAuthUser = session.user;
+  const { data: adminCheck } = await sb.rpc('is_super_admin');
+  state.isSuperAdmin = !!adminCheck;
   const { data: shop, error } = await sb.from('shops').select('*').eq('owner_id', currentAuthUser.id).maybeSingle();
   if (error || !shop) { showPage('page-account-auth'); return; }
   state.shop = shop; state.shopId = shop.id;
   loadUserRoleForShop();
   const expired = shop.expires_at && new Date(shop.expires_at) < new Date();
-  if (shop.status === 'suspended' || shop.status === 'cancelled' || expired) {
+  if (!state.isSuperAdmin && (shop.status === 'suspended' || shop.status === 'cancelled' || expired)) {
     document.getElementById('suspended-title').textContent = shop.status === 'suspended' ? 'บัญชีของคุณถูกระงับการใช้งาน' : (expired ? 'ระยะเวลาทดลอง/แพ็กเกจของคุณหมดอายุแล้ว' : 'บัญชีของคุณถูกยกเลิกการใช้งาน');
     showPage('page-suspended');
     return;
@@ -696,12 +813,18 @@ async function checkSession() {
   document.getElementById('main-app-wrapper').classList.remove('hidden');
   document.getElementById('page-account-auth').classList.remove('active');
   document.getElementById('page-suspended').classList.remove('active');
+  document.getElementById('page-reset-password').classList.remove('active');
+  document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
   debouncedFetchAll();
 }
 
-sb.auth.onAuthStateChange((_event, _session) => { /* checkSession() ถูกเรียกหลัง action ต่างๆ อยู่แล้ว */ });
+/* Supabase จะยิง event 'PASSWORD_RECOVERY' เมื่อผู้ใช้กดลิงก์รีเซ็ตรหัสผ่านจากอีเมล
+   ต้องสกัดไว้ก่อน แล้วบังคับให้เข้าหน้าตั้งรหัสผ่านใหม่ แทนที่จะปล่อยเข้าแอปตรงๆ */
+sb.auth.onAuthStateChange((event, _session) => {
+  if (event === 'PASSWORD_RECOVERY') { isPasswordRecoveryMode = true; showPage('page-reset-password'); }
+});
 
 /* ============================================================
 THEME (Dark Mode) & LANGUAGE SETTINGS
