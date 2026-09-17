@@ -83,6 +83,47 @@ body.dark-mode { background: #121212; color: #e0e0e0; }
 <body class="min-h-screen flex flex-col text-gray-800 antialiased pb-20">
 
 <!-- ============ PAGE LOGIN ============ -->
+<!-- หน้าสมัคร/เข้าสู่ระบบเจ้าของร้าน (Supabase Auth) -->
+<section id="page-account-auth" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full">
+  <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
+    <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto shadow-lg shadow-orange-500/30">🏪</div>
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-gray-800">ระบบจัดการร้านค้า POS</h2>
+      <p class="text-xs text-gray-400 mt-1">สมัครใช้งานหรือเข้าสู่ระบบร้านของคุณ</p>
+    </div>
+    <div class="flex bg-orange-50 rounded-full p-1 text-sm font-bold">
+      <button id="auth-tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-full transition bg-orange-500 text-white">เข้าสู่ระบบ</button>
+      <button id="auth-tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-2 rounded-full transition text-gray-500">สมัครร้านใหม่</button>
+    </div>
+
+    <div id="auth-form-login" class="space-y-3">
+      <input type="email" id="login-email-input" placeholder="อีเมลเจ้าของร้าน" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input type="password" id="login-password-input" placeholder="รหัสผ่าน" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <button onclick="handleAuthLogin()" class="w-full py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-sm tap shadow-md shadow-orange-500/20">เข้าสู่ระบบ</button>
+      <button onclick="handleForgotPassword()" class="w-full text-xs text-gray-400 font-medium pt-1">ลืมรหัสผ่าน?</button>
+    </div>
+
+    <div id="auth-form-signup" class="space-y-3 hidden">
+      <input type="text" id="signup-shopname-input" placeholder="ชื่อร้านค้า" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input type="email" id="signup-email-input" placeholder="อีเมลเจ้าของร้าน" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input type="password" id="signup-password-input" placeholder="ตั้งรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <input type="password" id="signup-password-confirm-input" placeholder="ยืนยันรหัสผ่าน" class="w-full border border-orange-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+      <button onclick="handleAuthSignup()" class="w-full py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-sm tap shadow-md shadow-orange-500/20">สมัครใช้งาน (ทดลองฟรี 14 วัน)</button>
+    </div>
+  </div>
+</section>
+
+<!-- หน้าแจ้งบัญชีหมดอายุ/ถูกระงับ -->
+<section id="page-suspended" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full text-center">
+  <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
+    <div class="w-16 h-16 bg-red-100 text-red-500 rounded-2xl flex items-center justify-center text-3xl mx-auto">⏰</div>
+    <h2 class="text-lg font-bold text-gray-800" id="suspended-title">บัญชีของคุณหมดอายุการใช้งาน</h2>
+    <p class="text-xs text-gray-500" id="suspended-desc">กรุณาติดต่อผู้ให้บริการเพื่อต่ออายุการใช้งานระบบ</p>
+    <button onclick="handleAuthLogout()" class="w-full py-3 bg-gray-100 text-gray-600 rounded-2xl font-bold text-sm tap">ออกจากระบบ</button>
+  </div>
+</section>
+
+<!-- หน้ากรอก PIN พนักงาน/เจ้าของร้าน (หลังล็อกอินอีเมลแล้ว) -->
 <section id="page-login" class="page space-y-4 max-w-sm mx-auto my-auto p-4 w-full text-center">
   <div class="bg-white p-6 rounded-3xl shadow-md border border-orange-100 space-y-4">
     <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto shadow-lg shadow-orange-500/30">
@@ -96,6 +137,7 @@ body.dark-mode { background: #121212; color: #e0e0e0; }
       <input type="password" id="login-passcode-input" placeholder="กรอก PIN / Passcode" class="w-full text-center tracking-widest text-lg border border-orange-200 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
       <button onclick="handleSeparateLogin()" class="w-full py-3.5 bg-orange-500 text-white rounded-2xl font-bold text-sm tap shadow-md shadow-orange-500/20" data-i18n="login_btn">เข้าสู่ระบบ</button>
     </div>
+    <button onclick="handleAuthLogout()" class="w-full text-xs text-gray-400 font-medium pt-1">ออกจากระบบร้านค้า (เปลี่ยนร้าน)</button>
   </div>
 </section>
 
@@ -348,6 +390,7 @@ body.dark-mode { background: #121212; color: #e0e0e0; }
     <h2 class="font-bold text-gray-800 text-base truncate" id="profile-shop-name">ร้านค้าของฉัน</h2>
     <p class="text-xs text-gray-400" data-i18n="profile_pic_desc">คลิกที่รูปเพื่อเปลี่ยนรูปโปรไฟล์</p>
     <span id="profile-role-badge" class="inline-block mt-1 text-[10px] bg-orange-100 text-orange-700 font-semibold px-2 py-0.5 rounded-full">สถานะ: เจ้าของร้าน</span>
+    <p id="profile-plan-status" class="text-[10px] text-gray-400 mt-1"></p>
   </div>
 </div>
 
@@ -561,6 +604,104 @@ function getPasscodes() { return { OWNER: localStorage.getItem('pos_pass_owner')
 let currentUserRole = localStorage.getItem('pos_user_role') || null;
 
 /* ============================================================
+MULTI-TENANT AUTH — สมัคร/เข้าสู่ระบบเจ้าของร้านด้วย Supabase Auth
+แต่ละร้านคือ 1 แถวในตาราง shops ผูกกับ auth user (owner_id)
+state.shopId ใช้แนบไปกับการอัปโหลดรูป (path) ส่วนตาราง SQL อื่น
+ใช้ default + RLS กรอง shop_id ให้อัตโนมัติแล้ว (ดู migration_multitenant.sql)
+============================================================ */
+let currentAuthUser = null;
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('auth-form-login').classList.toggle('hidden', !isLogin);
+  document.getElementById('auth-form-signup').classList.toggle('hidden', isLogin);
+  document.getElementById('auth-tab-login').className = 'flex-1 py-2 rounded-full transition ' + (isLogin ? 'bg-orange-500 text-white' : 'text-gray-500');
+  document.getElementById('auth-tab-signup').className = 'flex-1 py-2 rounded-full transition ' + (!isLogin ? 'bg-orange-500 text-white' : 'text-gray-500');
+}
+
+async function handleAuthSignup() {
+  const shopName = document.getElementById('signup-shopname-input').value.trim();
+  const email = document.getElementById('signup-email-input').value.trim();
+  const pass = document.getElementById('signup-password-input').value;
+  const confirm = document.getElementById('signup-password-confirm-input').value;
+  if (!shopName || !email || !pass) return toast('กรอกข้อมูลให้ครบทุกช่อง');
+  if (pass.length < 6) return toast('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+  if (pass !== confirm) return toast('รหัสผ่านและการยืนยันไม่ตรงกัน');
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  if (error) return toast('สมัครไม่สำเร็จ: ' + error.message);
+  if (!data.session) {
+    toast('สมัครสำเร็จ! กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ');
+    switchAuthTab('login');
+    return;
+  }
+  const { error: shopErr } = await sb.from('shops').insert({ owner_id: data.user.id, name: shopName });
+  if (shopErr) { toast('สร้างร้านไม่สำเร็จ: ' + shopErr.message); return; }
+  toast('สมัครสำเร็จ! ทดลองใช้งานฟรี 14 วัน');
+  await checkSession();
+}
+
+async function handleAuthLogin() {
+  const email = document.getElementById('login-email-input').value.trim();
+  const pass = document.getElementById('login-password-input').value;
+  if (!email || !pass) return toast('กรอกอีเมลและรหัสผ่าน');
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) return toast('เข้าสู่ระบบไม่สำเร็จ: ' + error.message);
+  await checkSession();
+}
+
+async function handleForgotPassword() {
+  const email = document.getElementById('login-email-input').value.trim();
+  if (!email) return toast('กรอกอีเมลของคุณก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if (error) return toast('ส่งลิงก์ไม่สำเร็จ: ' + error.message);
+  toast('ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว');
+}
+
+async function handleAuthLogout() {
+  logout(); // เคลียร์ PIN/role ของอุปกรณ์นี้
+  await sb.auth.signOut();
+  currentAuthUser = null; state.shop = null; state.shopId = null;
+  showPage('page-account-auth');
+}
+
+function renderPlanStatus() {
+  const el = document.getElementById('profile-plan-status'); if (!el || !state.shop) return;
+  const statusText = { trial: 'ทดลองใช้งาน', active: 'แพ็กเกจใช้งานปกติ', suspended: 'ถูกระงับการใช้งาน', cancelled: 'ยกเลิกการใช้งาน' }[state.shop.status] || state.shop.status;
+  const expires = state.shop.expires_at ? new Date(state.shop.expires_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'}) : '-';
+  el.textContent = `แพ็กเกจ: ${statusText} • หมดอายุ ${expires}`;
+}
+
+function showPage(id) {
+  document.getElementById('main-app-wrapper').classList.add('hidden');
+  ['page-account-auth','page-suspended','page-login'].forEach(p => document.getElementById(p).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ตรวจสอบ session ของ Supabase Auth ทุกครั้งที่โหลดแอป / ล็อกอิน / ล็อกเอาท์ */
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { currentAuthUser = null; showPage('page-account-auth'); return; }
+  currentAuthUser = session.user;
+  const { data: shop, error } = await sb.from('shops').select('*').eq('owner_id', currentAuthUser.id).maybeSingle();
+  if (error || !shop) { showPage('page-account-auth'); return; }
+  state.shop = shop; state.shopId = shop.id;
+  const expired = shop.expires_at && new Date(shop.expires_at) < new Date();
+  if (shop.status === 'suspended' || shop.status === 'cancelled' || expired) {
+    document.getElementById('suspended-title').textContent = shop.status === 'suspended' ? 'บัญชีของคุณถูกระงับการใช้งาน' : (expired ? 'ระยะเวลาทดลอง/แพ็กเกจของคุณหมดอายุแล้ว' : 'บัญชีของคุณถูกยกเลิกการใช้งาน');
+    showPage('page-suspended');
+    return;
+  }
+  document.getElementById('main-app-wrapper').classList.remove('hidden');
+  document.getElementById('page-account-auth').classList.remove('active');
+  document.getElementById('page-suspended').classList.remove('active');
+  checkAuth();
+  setupRealtime();
+  debouncedFetchAll();
+}
+
+sb.auth.onAuthStateChange((_event, _session) => { /* checkSession() ถูกเรียกหลัง action ต่างๆ อยู่แล้ว */ });
+
+/* ============================================================
 THEME (Dark Mode) & LANGUAGE SETTINGS
 ============================================================ */
 let isDarkMode = localStorage.getItem('pos_dark_mode') === 'true';
@@ -670,7 +811,7 @@ async function saveProfileDetails() {
   const branch_address = document.getElementById('profile-address-input').value.trim();
   const branch_phone = document.getElementById('profile-phone-input').value.trim();
   const branch_hours = document.getElementById('profile-hours-input').value.trim();
-  const { error } = await sb.from('shop_settings').upsert({ id: 1, branch_address, branch_phone, branch_hours });
+  const { error } = await sb.from('shop_settings').upsert({ shop_id: state.shopId, branch_address, branch_phone, branch_hours }, { onConflict: 'shop_id' });
   if (error) return toast((appLang==='en'?'Error: ':'เกิดข้อผิดพลาด: ') + error.message);
   await fetchAll();
   toast(appLang === 'en' ? 'Saved successfully' : 'บันทึกข้อมูลเรียบร้อย');
@@ -809,7 +950,7 @@ async function uploadProfilePic(input) {
   const url = await uploadImageFile(file, 'shop');
   if(!url) return;
   const field = currentUserRole === 'owner' ? 'profile_pic_owner_url' : 'profile_pic_staff_url';
-  const { error } = await sb.from('shop_settings').upsert({ id: 1, [field]: url });
+  const { error } = await sb.from('shop_settings').upsert({ shop_id: state.shopId, [field]: url }, { onConflict: 'shop_id' });
   if (error) return toast((appLang==='en'?'Error: ':'เกิดข้อผิดพลาด: ') + error.message);
   await fetchAll();
   loadProfilePic();
@@ -855,7 +996,7 @@ function showChangePasscodeModal() {
   });
 }
 
-let state = { categories: [], products: [], addonGroups: [], addonOptions: [], productAddonGroups: [], tablesList: [], openOrders: [], orderItems: [], allOrderItems: [], orderItemAddons: [], shopSettings: null, currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day', chartType: 'bar', expandedStockCategories: {}, pendingDeliveryOrderNo: null };
+let state = { shop: null, shopId: null, categories: [], products: [], addonGroups: [], addonOptions: [], productAddonGroups: [], tablesList: [], openOrders: [], orderItems: [], allOrderItems: [], orderItemAddons: [], shopSettings: null, currentCategory: 'ทั้งหมด', currentTableId: null, cart: [], dashboardRange: 'day', chartType: 'bar', expandedStockCategories: {}, pendingDeliveryOrderNo: null };
 
 function toast(msg){ const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg; document.getElementById('toast-container').appendChild(el); setTimeout(()=>el.remove(), 2200); }
 function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -886,6 +1027,7 @@ function renderCurrentPageContent(){
   if(currentPage==='stock') renderStock();
   if(currentPage==='profile') { 
     document.getElementById('profile-shop-name').textContent = (state.shopSettings||{}).shop_name || 'ร้านค้าของฉัน'; 
+    renderPlanStatus();
     loadProfileDetails();
       loadProfilePic();
   }
@@ -903,11 +1045,11 @@ function showGenericModal(){ document.getElementById('generic-modal-backdrop').c
 function closeGenericModal(){ document.getElementById('generic-modal-backdrop').classList.add('hidden'); }
 
 async function fetchAll(){
-  const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([ sb.from('categories').select('*').order('id'), sb.from('products').select('*').order('sort_order'), sb.from('addon_groups').select('*').order('id'), sb.from('addon_options').select('*').order('sort_order'), sb.from('product_addon_groups').select('*'), sb.from('tables').select('*').order('sort_order'), sb.from('orders').select('*').eq('status','open'), sb.from('order_items').select('*').order('id'), sb.from('order_item_addons').select('*'), sb.from('shop_settings').select('*').eq('id',1).maybeSingle() ]);
+  const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([ sb.from('categories').select('*').order('id'), sb.from('products').select('*').order('sort_order'), sb.from('addon_groups').select('*').order('id'), sb.from('addon_options').select('*').order('sort_order'), sb.from('product_addon_groups').select('*'), sb.from('tables').select('*').order('sort_order'), sb.from('orders').select('*').eq('status','open'), sb.from('order_items').select('*').order('id'), sb.from('order_item_addons').select('*'), sb.from('shop_settings').select('*').eq('shop_id', state.shopId).maybeSingle() ]);
   state.categories = cat.data || []; state.products = prod.data || []; state.addonGroups = ag.data || []; state.addonOptions = ao.data || []; state.productAddonGroups = pag.data || []; state.tablesList = tbl.data || []; state.openOrders = ord.data || [];
   state.allOrderItems = oi.data || [];
   state.orderItems = state.allOrderItems.filter(i=>!i.cancelled);
-  state.orderItemAddons = oia.data || []; state.shopSettings = ss.data || {id:1, shop_name:'ร้านค้าของฉัน', qr_image_url:null, logo_url:null, receipt_paper:'80mm', receipt_footer:'', auto_print:false};
+  state.orderItemAddons = oia.data || []; state.shopSettings = ss.data || {shop_id: state.shopId, shop_name: (state.shop&&state.shop.name)||'ร้านค้าของฉัน', qr_image_url:null, logo_url:null, receipt_paper:'80mm', receipt_footer:'', auto_print:false};
   document.getElementById('drawer-shop-name').textContent = state.shopSettings.shop_name || 'ร้านค้าของฉัน';
   await ensureDeliveryTable();
   renderCurrentPageContent(); updateCartBar(); lucide.createIcons();
@@ -927,7 +1069,7 @@ function setupRealtime(){
   ['categories','products','addon_groups','addon_options','product_addon_groups','tables','orders','order_items','order_item_addons','shop_settings'].forEach(t=>{ channel.on('postgres_changes', {event:'*', schema:'public', table:t}, ()=>{ debouncedFetchAll(); }); });
   channel.subscribe(status=>{ const dot = document.getElementById('realtime-dot'); const lbl = document.getElementById('realtime-label'); if(status==='SUBSCRIBED'){ dot.className='w-2 h-2 rounded-full bg-green-500'; lbl.textContent=appLang==='en'?'Live Connected':'เชื่อมต่อสด'; } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT'){ dot.className='w-2 h-2 rounded-full bg-red-500'; lbl.textContent=appLang==='en'?'Connection Error':'เชื่อมต่อไม่สำเร็จ'; } });
 }
-async function uploadImageFile(file, prefix){ const ext = (file.name.split('.').pop()||'jpg').toLowerCase(); const path = prefix+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext; const {error} = await sb.storage.from(BUCKET).upload(path, file, {upsert:true}); if(error){ toast(appLang==='en'?'Upload failed':'อัปโหลดรูปไม่สำเร็จ'); return null; } const {data} = sb.storage.from(BUCKET).getPublicUrl(path); return data.publicUrl; }
+async function uploadImageFile(file, prefix){ const ext = (file.name.split('.').pop()||'jpg').toLowerCase(); const path = (state.shopId||'unassigned')+'/'+prefix+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext; const {error} = await sb.storage.from(BUCKET).upload(path, file, {upsert:true}); if(error){ toast(appLang==='en'?'Upload failed':'อัปโหลดรูปไม่สำเร็จ'); return null; } const {data} = sb.storage.from(BUCKET).getPublicUrl(path); return data.publicUrl; }
 
 function renderHome(){
   const banner = document.getElementById('home-table-banner'); const noTable = document.getElementById('home-no-table');
@@ -1682,10 +1824,10 @@ function renderAdminShop(){
   if(state.shopSettings.qr_image_url){ document.getElementById('qr-preview').src = state.shopSettings.qr_image_url; document.getElementById('qr-preview').classList.remove('hidden'); }
   if(state.shopSettings.logo_url){ document.getElementById('logo-preview').src = state.shopSettings.logo_url; document.getElementById('logo-preview').classList.remove('hidden'); }
 }
-async function saveShopName(){ const n = document.getElementById('shop-name-input').value.trim(); await sb.from('shop_settings').upsert({id:1, shop_name:n}); toast(appLang==='en'?'Saved shop name':'บันทึกชื่อร้านแล้ว'); await fetchAll(); }
-async function saveBillSettings(){ const p = document.getElementById('receipt-paper-input').value; const f = document.getElementById('receipt-footer-input').value; const ap = document.getElementById('receipt-auto-print-input').checked; await sb.from('shop_settings').upsert({id:1, receipt_paper:p, receipt_footer:f, auto_print:ap}); toast(appLang==='en'?'Receipt settings saved':'บันทึกตั้งค่าบิลแล้ว'); await fetchAll(); }
-async function uploadQr(file){ if(!file) return; const url = await uploadImageFile(file, 'shop'); if(url){ await sb.from('shop_settings').upsert({id:1, qr_image_url:url}); toast(appLang==='en'?'QR uploaded':'อัปโหลดรูป QR แล้ว'); await fetchAll(); renderAdminShop(); } }
-async function uploadLogo(file){ if(!file) return; const url = await uploadImageFile(file, 'shop'); if(url){ await sb.from('shop_settings').upsert({id:1, logo_url:url}); toast(appLang==='en'?'Logo uploaded':'อัปโหลดโลโก้แล้ว'); await fetchAll(); renderAdminShop(); } }
+async function saveShopName(){ const n = document.getElementById('shop-name-input').value.trim(); await sb.from('shop_settings').upsert({shop_id: state.shopId, shop_name:n}, {onConflict:'shop_id'}); toast(appLang==='en'?'Saved shop name':'บันทึกชื่อร้านแล้ว'); await fetchAll(); }
+async function saveBillSettings(){ const p = document.getElementById('receipt-paper-input').value; const f = document.getElementById('receipt-footer-input').value; const ap = document.getElementById('receipt-auto-print-input').checked; await sb.from('shop_settings').upsert({shop_id: state.shopId, receipt_paper:p, receipt_footer:f, auto_print:ap}, {onConflict:'shop_id'}); toast(appLang==='en'?'Receipt settings saved':'บันทึกตั้งค่าบิลแล้ว'); await fetchAll(); }
+async function uploadQr(file){ if(!file) return; const url = await uploadImageFile(file, 'shop'); if(url){ await sb.from('shop_settings').upsert({shop_id: state.shopId, qr_image_url:url}, {onConflict:'shop_id'}); toast(appLang==='en'?'QR uploaded':'อัปโหลดรูป QR แล้ว'); await fetchAll(); renderAdminShop(); } }
+async function uploadLogo(file){ if(!file) return; const url = await uploadImageFile(file, 'shop'); if(url){ await sb.from('shop_settings').upsert({shop_id: state.shopId, logo_url:url}, {onConflict:'shop_id'}); toast(appLang==='en'?'Logo uploaded':'อัปโหลดโลโก้แล้ว'); await fetchAll(); renderAdminShop(); } }
 
 async function deleteRow(table, id){
   const result = await Swal.fire({
@@ -1705,7 +1847,7 @@ async function deleteRow(table, id){
   await fetchAll();
 }
 
-window.onload = () => { applyTheme(); applyLanguage(); checkAuth(); setupRealtime(); debouncedFetchAll(); };
+window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
 
 </script>
 </body>
