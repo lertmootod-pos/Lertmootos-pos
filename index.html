@@ -1972,7 +1972,31 @@ async function deleteRow(table, id){
   await fetchAll();
 }
 
-window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
+function setupRealtime(){
+  const channel = sb.channel('public:all')
+    .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+      debouncedFetchAll();
+    })
+    .subscribe((status) => {
+      const dot = document.getElementById('realtime-dot');
+      const label = document.getElementById('realtime-label');
+      if (status === 'SUBSCRIBED') {
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-green-500';
+        if (label) label.textContent = appLang === 'en' ? 'Connected' : 'เชื่อมต่อเรียบร้อย';
+      } else {
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-yellow-500';
+        if (label) label.textContent = appLang === 'en' ? 'Connecting...' : 'กำลังเชื่อมต่อ...';
+      }
+    });
+}
+
+window.onload = () => { 
+  applyTheme(); 
+  applyLanguage(); 
+  checkSession(); 
+  setupRealtime(); 
+};
+
 
 </script>
 </body>
