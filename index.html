@@ -1171,6 +1171,8 @@ function closeGenericModal(){ document.getElementById('generic-modal-backdrop').
 
 async function fetchAll(){
   const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([ sb.from('categories').select('*').order('id'), sb.from('products').select('*').order('sort_order'), sb.from('addon_groups').select('*').order('id'), sb.from('addon_options').select('*').order('sort_order'), sb.from('product_addon_groups').select('*'), sb.from('tables').select('*').order('sort_order'), sb.from('orders').select('*').eq('status','open'), sb.from('order_items').select('*').order('id'), sb.from('order_item_addons').select('*'), sb.from('shop_settings').select('*').eq('shop_id', state.shopId).maybeSingle() ]);
+  const firstError = [cat,prod,ag,ao,pag,tbl,ord,oi,oia,ss].map(r=>r.error).find(e=>e);
+  if (firstError) { console.error('fetchAll error:', firstError); toast('โหลดข้อมูลไม่สำเร็จ: ' + firstError.message); }
   state.categories = cat.data || []; state.products = prod.data || []; state.addonGroups = ag.data || []; state.addonOptions = ao.data || []; state.productAddonGroups = pag.data || []; state.tablesList = tbl.data || []; state.openOrders = ord.data || [];
   state.allOrderItems = oi.data || [];
   state.orderItems = state.allOrderItems.filter(i=>!i.cancelled);
@@ -1972,31 +1974,7 @@ async function deleteRow(table, id){
   await fetchAll();
 }
 
-function setupRealtime(){
-  const channel = sb.channel('public:all')
-    .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-      debouncedFetchAll();
-    })
-    .subscribe((status) => {
-      const dot = document.getElementById('realtime-dot');
-      const label = document.getElementById('realtime-label');
-      if (status === 'SUBSCRIBED') {
-        if (dot) dot.className = 'w-2 h-2 rounded-full bg-green-500';
-        if (label) label.textContent = appLang === 'en' ? 'Connected' : 'เชื่อมต่อเรียบร้อย';
-      } else {
-        if (dot) dot.className = 'w-2 h-2 rounded-full bg-yellow-500';
-        if (label) label.textContent = appLang === 'en' ? 'Connecting...' : 'กำลังเชื่อมต่อ...';
-      }
-    });
-}
-
-window.onload = () => { 
-  applyTheme(); 
-  applyLanguage(); 
-  checkSession(); 
-  setupRealtime(); 
-};
-
+window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
 
 </script>
 </body>
