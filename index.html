@@ -821,7 +821,7 @@ async function checkSession() {
   if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
   renderCategoryChips();
   renderProducts();
-  renderHome();
+  if (typeof showPage === 'function') showPage('page-home');
 
 
 
