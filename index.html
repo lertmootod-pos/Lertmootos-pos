@@ -817,7 +817,7 @@ async function checkSession() {
   document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
-  await debouncedFetchAll();
+  await fetchAll();
   renderCategoryChips();
   renderProducts();
 }
@@ -1981,8 +1981,8 @@ window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
 // ตรวจจับเมื่อผู้ใช้พับแอปแล้วเปิดกลับเข้ามาใหม่ (Visibility Change)
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible') {
-    if (typeof debouncedFetchAll === 'function') {
-      await debouncedFetchAll();
+    if (typeof fetchAll === 'function') {
+      await fetchAll();
     }
     renderCategoryChips();
     renderProducts();
