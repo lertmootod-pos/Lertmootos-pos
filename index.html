@@ -817,9 +817,10 @@ async function checkSession() {
   document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
-  await fetchAll();
-  renderCategoryChips();
-  renderProducts();
+await fetchAll();
+if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
+renderCategoryChips();
+renderProducts();  
 }
 
 
@@ -1978,12 +1979,12 @@ async function deleteRow(table, id){
 
 
 window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
-// ตรวจจับเมื่อผู้ใช้พับแอปแล้วเปิดกลับเข้ามาใหม่ (Visibility Change)
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible') {
     if (typeof fetchAll === 'function') {
       await fetchAll();
     }
+    if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
     renderCategoryChips();
     renderProducts();
   }
