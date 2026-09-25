@@ -1170,7 +1170,8 @@ function showGenericModal(){ document.getElementById('generic-modal-backdrop').c
 function closeGenericModal(){ document.getElementById('generic-modal-backdrop').classList.add('hidden'); }
 
 async function fetchAll(){
-  const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([ sb.from('categories').select('*').order('id'), sb.from('products').select('*').order('sort_order'), sb.from('addon_groups').select('*').order('id'), sb.from('addon_options').select('*').order('sort_order'), sb.from('product_addon_groups').select('*'), sb.from('tables').select('*').order('sort_order'), sb.from('orders').select('*').eq('status','open'), sb.from('order_items').select('*').order('id'), sb.from('order_item_addons').select('*'), sb.from('shop_settings').select('*').eq('shop_id', state.shopId).maybeSingle() ]);
+  const [cat, prod, ag, ao, pag, tbl, ord, oi, oia, ss] = await Promise.all([ sb.from('categories').select('*').order('id'), sb.from('products').select('*').order('sort_order'), sb.from('addon_groups').select('*').order('sort_order'),
+sb.from('addon_options').select('*').order('sort_order'), sb.from('product_addon_groups').select('*'), sb.from('tables').select('*').order('sort_order'), sb.from('orders').select('*').eq('status','open'), sb.from('order_items').select('*').order('id'), sb.from('order_item_addons').select('*'), sb.from('shop_settings').select('*').eq('shop_id', state.shopId).maybeSingle() ]);
   const firstError = [cat,prod,ag,ao,pag,tbl,ord,oi,oia,ss].map(r=>r.error).find(e=>e);
   if (firstError) { console.error('fetchAll error:', firstError); toast('โหลดข้อมูลไม่สำเร็จ: ' + firstError.message); }
   state.categories = cat.data || []; state.products = prod.data || []; state.addonGroups = ag.data || []; state.addonOptions = ao.data || []; state.productAddonGroups = pag.data || []; state.tablesList = tbl.data || []; state.openOrders = ord.data || [];
@@ -1701,7 +1702,7 @@ async function moveProduct(id, direction) {
   toast(appLang === 'en' ? 'Order updated' : 'อัปเดตลำดับเรียบร้อย');
 }
 
-// ==================== REORDER / DRAG & DROP SYSTEM ====================
+// ==================== REORDER / DRAG & DROP SYSTEM (GENERIC - ใช้ได้ทุกหน้า) ====================
 let draggedElem = null;
 let placeholderElem = null;
 let touchOffsetY = 0;
@@ -1709,29 +1710,41 @@ let touchOffsetX = 0;
 let initialHeight = 0;
 let initialWidth = 0;
 let scrollInterval = null;
+let currentSortContainerId = null;
+let currentSortTable = null;
 
-function initSortableProducts() {
-  const container = document.getElementById('admin-products-list');
-  if(!container) return;
+// ฟังก์ชันกลาง: ใช้เปิดระบบลากสำหรับ container ใดก็ได้ ระบุ id ของ container และชื่อ table ใน supabase
+function initSortable(containerId, tableName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-  const items = container.querySelectorAll('.sortable-item');
+  const items = Array.from(container.children).filter(el => el.classList && el.classList.contains('sortable-item'));
   items.forEach(item => {
     const handle = item.querySelector('.drag-handle');
-    if(!handle) return;
-
+    if (!handle) return;
+    handle.setAttribute('data-sort-container', containerId);
+    handle.setAttribute('data-sort-table', tableName);
     handle.addEventListener('touchstart', onPointerDown, { passive: false });
     handle.addEventListener('mousedown', onPointerDown);
   });
+}
+
+// คงไว้เหมือนเดิม เพื่อไม่ให้กระทบหน้าจัดการเมนู/สินค้าที่มีอยู่แล้ว
+function initSortableProducts() {
+  initSortable('admin-products-list', 'products');
 }
 
 function onPointerDown(e) {
   e.preventDefault();
   const isTouch = e.type === 'touchstart';
   const point = isTouch ? e.touches[0] : e;
-  
+
   const handle = e.currentTarget;
+  currentSortContainerId = handle.getAttribute('data-sort-container');
+  currentSortTable = handle.getAttribute('data-sort-table');
+
   draggedElem = handle.closest('.sortable-item');
-  if(!draggedElem) return;
+  if (!draggedElem) return;
 
   const rect = draggedElem.getBoundingClientRect();
   initialWidth = rect.width;
@@ -1742,7 +1755,7 @@ function onPointerDown(e) {
   placeholderElem = document.createElement('div');
   placeholderElem.className = 'sort-placeholder';
   placeholderElem.style.height = `${initialHeight}px`;
-  
+
   draggedElem.parentNode.insertBefore(placeholderElem, draggedElem);
 
   draggedElem.classList.add('dragging-active');
@@ -1760,7 +1773,7 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
-  if(!draggedElem) return;
+  if (!draggedElem || !currentSortContainerId) return;
   e.preventDefault();
   const isTouch = e.type === 'touchmove';
   const point = isTouch ? e.touches[0] : e;
@@ -1777,8 +1790,9 @@ function onPointerMove(e) {
     stopAutoScroll();
   }
 
-  const container = document.getElementById('admin-products-list');
-  const siblings = Array.from(container.querySelectorAll('.sortable-item:not(.dragging-active)'));
+  const container = document.getElementById(currentSortContainerId);
+  if (!container) return;
+  const siblings = Array.from(container.children).filter(el => el !== draggedElem && el.classList && el.classList.contains('sortable-item'));
 
   let nextSibling = siblings.find(sibling => {
     const box = sibling.getBoundingClientRect();
@@ -1817,44 +1831,34 @@ function onPointerUp(e) {
   window.removeEventListener('mousemove', onPointerMove);
   window.removeEventListener('mouseup', onPointerUp);
 
+  const containerId = currentSortContainerId;
+  const tableName = currentSortTable;
+
   draggedElem = null;
   placeholderElem = null;
+  currentSortContainerId = null;
+  currentSortTable = null;
 
-  saveNewSortOrders();
+  saveNewSortOrders(containerId, tableName);
 }
 
-function startAutoScroll(step) {
-  if (scrollInterval) return;
-  const mainScroll = document.getElementById('main-content-scroll') || document.body;
-  scrollInterval = setInterval(() => {
-    mainScroll.scrollTop += step;
-    window.scrollBy(0, step);
-  }, 16);
-}
+async function saveNewSortOrders(containerId, tableName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const items = Array.from(container.children).filter(el => el.classList && el.classList.contains('sortable-item'));
 
-function stopAutoScroll() {
-  if (scrollInterval) {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
-  }
-}
-
-async function saveNewSortOrders() {
-  const container = document.getElementById('admin-products-list');
-  const items = container.querySelectorAll('.sortable-item');
-  
   const updates = [];
   items.forEach((item, index) => {
-    const productId = item.getAttribute('data-id');
-    if (productId) {
-      updates.push(sb.from('products').update({ sort_order: index + 1 }).eq('id', productId));
+    const rowId = item.getAttribute('data-id');
+    if (rowId) {
+      updates.push(sb.from(tableName).update({ sort_order: index + 1 }).eq('id', rowId));
     }
   });
 
   try {
     await Promise.all(updates);
-    if(typeof toast === 'function') toast(typeof appLang !== 'undefined' && appLang === 'en' ? 'Order saved' : 'บันทึกการจัดเรียงแล้ว');
-  } catch(err) {
+    if (typeof toast === 'function') toast(typeof appLang !== 'undefined' && appLang === 'en' ? 'Order saved' : 'บันทึกการจัดเรียงแล้ว');
+  } catch (err) {
     console.error('Error saving sort orders:', err);
   }
 }
@@ -1916,11 +1920,27 @@ async function saveProduct(id){
 }
 
 function renderAdminAddons(){
-  document.getElementById('admin-addons-list').innerHTML = state.addonGroups.map(g=>{
+  const sortedGroups = [...(state.addonGroups||[])].sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  document.getElementById('admin-addons-list').innerHTML = sortedGroups.map(g=>{
     const opts = state.addonOptions.filter(o=>String(o.group_id)===String(g.id)).sort((a,b)=>a.sort_order-b.sort_order);
-    return '<div class="bg-white rounded-xl border border-orange-100 p-3 shadow-sm mb-2"><div class="flex justify-between items-center mb-2"><div class="min-w-0"><p class="text-sm font-bold truncate">'+escapeHtml(g.name)+'</p><p class="text-[11px] text-gray-500">'+(g.required?(appLang==='en'?'Required':'*จำเป็น'):(appLang==='en'?'Optional':'ตัวเลือกเสริม'))+' • '+(g.max_select>1?(appLang==='en'?'Max ':'เลือกสูงสุด ')+g.max_select:(appLang==='en'?'Max 1':'เลือกได้ 1 อย่าง'))+'</p></div><div class="flex gap-2 shrink-0"><button onclick="openAddonGroupModal(\''+g.id+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button><button onclick="deleteRow(\'addon_groups\',\''+g.id+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div></div><div class="space-y-1.5 border-t border-orange-50 pt-2">'+(opts.length?opts.map(o=>'<div class="flex justify-between items-center text-xs bg-gray-50 px-2 py-1.5 rounded-lg"><span class="truncate pr-2">- '+escapeHtml(o.name)+' '+(o.price_delta>0?('(+'+money(o.price_delta)+')'):'')+' '+(o.allow_qty?'(เพิ่มจำนวนได้)':'')+'</span><button onclick="deleteRow(\'addon_options\',\''+o.id+'\')" class="text-red-400 hover:text-red-600"><i data-lucide="x" class="w-3 h-3"></i></button></div>').join(''):'<p class="text-xs text-gray-400">ยังไม่มีตัวเลือก</p>')+'<button onclick="addAddonOption(\''+g.id+'\')" class="w-full text-center text-xs text-orange-600 font-bold py-1 bg-orange-50 rounded-lg mt-1 tap">+ '+(appLang==='en'?'Add Option':'เพิ่มตัวเลือกในกลุ่มนี้')+'</button></div></div>';
+    return '<div class="sortable-item bg-white rounded-xl border border-orange-100 p-3 shadow-sm mb-2" data-id="'+g.id+'">'
+      + '<div class="flex justify-between items-center mb-2">'
+        + '<button class="drag-handle p-1.5 text-gray-400 hover:text-orange-500 cursor-grab active:cursor-grabbing shrink-0"><i data-lucide="grip-vertical" class="w-5 h-5"></i></button>'
+        + '<div class="min-w-0 flex-1 px-2"><p class="text-sm font-bold truncate">'+escapeHtml(g.name)+'</p><p class="text-[11px] text-gray-500">'+(g.required?(appLang==='en'?'Required':'*จำเป็น'):(appLang==='en'?'Optional':'ตัวเลือกเสริม'))+' • '+(g.max_select>1?(appLang==='en'?'Max ':'เลือกสูงสุด ')+g.max_select:(appLang==='en'?'Max 1':'เลือกได้ 1 อย่าง'))+'</p></div>'
+        + '<div class="flex gap-2 shrink-0"><button onclick="openAddonGroupModal(\''+g.id+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button><button onclick="deleteRow(\'addon_groups\',\''+g.id+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div>'
+      + '</div>'
+      + '<div id="addon-options-list-'+g.id+'" class="space-y-1.5 border-t border-orange-50 pt-2">'
+        + (opts.length ? opts.map(o=>'<div class="sortable-item flex items-center gap-2 text-xs bg-gray-50 px-2 py-1.5 rounded-lg" data-id="'+o.id+'"><button class="drag-handle p-0.5 text-gray-400 hover:text-orange-500 cursor-grab active:cursor-grabbing shrink-0"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i></button><span class="truncate flex-1">- '+escapeHtml(o.name)+' '+(o.price_delta>0?('(+'+money(o.price_delta)+')'):'')+' '+(o.allow_qty?'(เพิ่มจำนวนได้)':'')+'</span><button onclick="deleteRow(\'addon_options\',\''+o.id+'\')" class="text-red-400 hover:text-red-600 shrink-0"><i data-lucide="x" class="w-3 h-3"></i></button></div>').join('') : '<p class="text-xs text-gray-400">ยังไม่มีตัวเลือก</p>')
+        + '<button onclick="addAddonOption(\''+g.id+'\')" class="w-full text-center text-xs text-orange-600 font-bold py-1 bg-orange-50 rounded-lg mt-1 tap">+ '+(appLang==='en'?'Add Option':'เพิ่มตัวเลือกในกลุ่มนี้')+'</button>'
+      + '</div>'
+    + '</div>';
   }).join('') || '<p class="text-center text-gray-400 text-sm py-6">ยังไม่มีกลุ่มตัวเลือก</p>';
+
   lucide.createIcons();
+  initSortable('admin-addons-list', 'addon_groups');
+  sortedGroups.forEach(g=>{
+    initSortable('addon-options-list-'+g.id, 'addon_options');
+  });
 }
 function openAddonGroupModal(id){
   const g = id ? state.addonGroups.find(x=>String(x.id)===String(id)) : null;
@@ -1930,7 +1950,8 @@ function openAddonGroupModal(id){
 async function saveAddonGroup(id){
   const name = document.getElementById('ag-name').value.trim(), min_select = Number(document.getElementById('ag-min').value||0), max_select = Number(document.getElementById('ag-max').value||1), required = document.getElementById('ag-req').checked;
   if(!name) return toast(appLang==='en'?'Enter group name':'กรอกชื่อกลุ่ม');
-  if(id) await sb.from('addon_groups').update({name, min_select, max_select, required}).eq('id', id); else await sb.from('addon_groups').insert({name, min_select, max_select, required});
+  if(id) await sb.from('addon_groups').update({name, min_select, max_select, required}).eq('id', id); else await sb.from('addon_groups').insert({name, min_select, max_select, required, sort_order: state.addonGroups.length});
+
   closeGenericModal(); await fetchAll();
 }
 async function addAddonOption(groupId){
@@ -1938,7 +1959,12 @@ async function addAddonOption(groupId){
   if(formValues && formValues[0]){ await sb.from('addon_options').insert({ group_id: groupId, name: formValues[0].trim(), price_delta: Number(formValues[1]||0), allow_qty: formValues[2], sort_order: state.addonOptions.filter(o=>String(o.group_id)===String(groupId)).length }); await fetchAll(); }
 }
 
-function renderAdminTables(){ document.getElementById('admin-tables-list').innerHTML = state.tablesList.map(t=>'<div class="bg-white rounded-xl border border-orange-100 p-3 flex justify-between items-center shadow-sm"><span class="text-sm font-semibold">'+escapeHtml(t.name)+'</span><div class="flex gap-2"><button onclick="openTableModal(\''+t.id+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button><button onclick="deleteRow(\'tables\',\''+t.id+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div></div>').join('') || '<p class="text-center text-gray-400 text-sm py-6">ยังไม่มีโต๊ะ</p>'; lucide.createIcons(); }
+function renderAdminTables(){
+  const sorted = [...(state.tablesList||[])].sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  document.getElementById('admin-tables-list').innerHTML = sorted.map(t=>'<div class="sortable-item bg-white rounded-xl border border-orange-100 p-3 flex items-center gap-2 shadow-sm" data-id="'+t.id+'"><button class="drag-handle p-1.5 text-gray-400 hover:text-orange-500 cursor-grab active:cursor-grabbing shrink-0"><i data-lucide="grip-vertical" class="w-5 h-5"></i></button><span class="text-sm font-semibold flex-1 truncate">'+escapeHtml(t.name)+'</span><div class="flex gap-2 shrink-0"><button onclick="openTableModal(\''+t.id+'\')" class="p-2 bg-orange-50 rounded-full tap"><i data-lucide="pencil" class="w-4 h-4 text-gray-600"></i></button><button onclick="deleteRow(\'tables\',\''+t.id+'\')" class="p-2 bg-red-50 rounded-full tap"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></button></div></div>').join('') || '<p class="text-center text-gray-400 text-sm py-6">ยังไม่มีโต๊ะ</p>';
+  lucide.createIcons();
+  initSortable('admin-tables-list', 'tables');
+}
 function openTableModal(id){ const t = id ? state.tablesList.find(x=>String(x.id)===String(id)) : null; document.getElementById('generic-modal-body').innerHTML = '<div class="flex items-center justify-between mb-3"><h3 class="font-bold text-lg">'+(t?(appLang==='en'?'Edit Table':'แก้ไขโต๊ะ'):(appLang==='en'?'Add Table':'เพิ่มโต๊ะ'))+'</h3><button onclick="closeGenericModal()"><i data-lucide="x" class="w-5 h-5"></i></button></div><label class="text-xs font-bold text-gray-500">'+(appLang==='en'?'Table Name/Number':'ชื่อโต๊ะ / หมายเลขโต๊ะ')+'</label><input id="table-name-input" value="'+(t?escapeHtml(t.name):'')+'" class="w-full border border-orange-100 rounded-xl px-3 py-2 text-sm mt-1 mb-4"><button onclick="saveTable('+(id?('\''+id+'\''):'null')+')" class="w-full py-3 bg-orange-500 text-white rounded-full text-sm font-bold tap">'+(appLang==='en'?'Save':'บันทึก')+'</button>'; showGenericModal(); lucide.createIcons(); }
 async function saveTable(id){ const name = document.getElementById('table-name-input').value.trim(); if(!name) return toast(appLang==='en'?'Enter table name':'กรอกชื่อโต๊ะ'); if(id) await sb.from('tables').update({name}).eq('id', id); else await sb.from('tables').insert({name, sort_order:state.tablesList.length}); closeGenericModal(); await fetchAll(); }
 
