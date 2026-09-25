@@ -817,8 +817,11 @@ async function checkSession() {
   document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
-  debouncedFetchAll();
+  await debouncedFetchAll();
+  renderCategoryChips();
+  renderProducts();
 }
+
 
 /* Supabase จะยิง event 'PASSWORD_RECOVERY' เมื่อผู้ใช้กดลิงก์รีเซ็ตรหัสผ่านจากอีเมล
    ต้องสกัดไว้ก่อน แล้วบังคับให้เข้าหน้าตั้งรหัสผ่านใหม่ แทนที่จะปล่อยเข้าแอปตรงๆ */
@@ -1971,8 +1974,8 @@ async function deleteRow(table, id){
   const { error } = await sb.from(table).delete().eq('id', id);
   if(error) return toast((appLang==='en'?'Delete failed: ':'ลบไม่สำเร็จ: ') + error.message);
   toast(appLang==='en'?'Deleted successfully':'ลบข้อมูลเรียบร้อย');
-  await fetchAll();
 }
+
 
 window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
 
