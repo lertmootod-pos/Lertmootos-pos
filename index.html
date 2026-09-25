@@ -817,11 +817,13 @@ async function checkSession() {
   document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
-await fetchAll();
-if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
-renderCategoryChips();
-renderProducts();  
-}
+  await fetchAll();
+  if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
+  renderCategoryChips();
+  renderProducts();
+  renderHome();
+
+
 
 
 /* Supabase จะยิง event 'PASSWORD_RECOVERY' เมื่อผู้ใช้กดลิงก์รีเซ็ตรหัสผ่านจากอีเมล
