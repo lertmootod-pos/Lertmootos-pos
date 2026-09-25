@@ -822,13 +822,6 @@ if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 
 renderCategoryChips();
 renderProducts();
 
-// เปิดหน้าหลักด้วย classList โดยตรง ป้องกัน Error สคริปต์พัง
-const homePage = document.getElementById('page-home');
-if (homePage) homePage.classList.add('active');
-
-
-
-
 /* Supabase จะยิง event 'PASSWORD_RECOVERY' เมื่อผู้ใช้กดลิงก์รีเซ็ตรหัสผ่านจากอีเมล
    ต้องสกัดไว้ก่อน แล้วบังคับให้เข้าหน้าตั้งรหัสผ่านใหม่ แทนที่จะปล่อยเข้าแอปตรงๆ */
 sb.auth.onAuthStateChange((event, _session) => {
