@@ -1978,6 +1978,23 @@ async function deleteRow(table, id){
 
 
 window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
+// ตรวจจับเมื่อผู้ใช้พับแอปแล้วเปิดกลับเข้ามาใหม่ (Visibility Change)
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible') {
+    if (typeof debouncedFetchAll === 'function') {
+      await debouncedFetchAll();
+    }
+    renderCategoryChips();
+    renderProducts();
+  }
+});
+
+
+// ตรวจจับเมื่อหน้าต่างแอปได้รับโฟกัสอีกครั้ง (Window Focus)
+window.addEventListener('focus', () => {
+  renderCategoryChips();
+  renderProducts();
+});
 
 </script>
 </body>
