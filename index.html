@@ -817,19 +817,8 @@ async function checkSession() {
   document.getElementById('page-admin-panel').classList.remove('active');
   checkAuth();
   setupRealtime();
-  await fetchAll();
-if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
-renderCategoryChips();
-renderProducts();
-
-// 👉 สั่งเปิดแสดงผลตัวครอบหลักและหน้า Home โดยตรง
-document.getElementById('main-app-wrapper')?.classList.remove('hidden');
-const homePage = document.getElementById('page-home');
-if (homePage) {
-  homePage.classList.remove('hidden');
-  homePage.classList.add('active');
+  debouncedFetchAll();
 }
-
 
 /* Supabase จะยิง event 'PASSWORD_RECOVERY' เมื่อผู้ใช้กดลิงก์รีเซ็ตรหัสผ่านจากอีเมล
    ต้องสกัดไว้ก่อน แล้วบังคับให้เข้าหน้าตั้งรหัสผ่านใหม่ แทนที่จะปล่อยเข้าแอปตรงๆ */
@@ -1982,27 +1971,10 @@ async function deleteRow(table, id){
   const { error } = await sb.from(table).delete().eq('id', id);
   if(error) return toast((appLang==='en'?'Delete failed: ':'ลบไม่สำเร็จ: ') + error.message);
   toast(appLang==='en'?'Deleted successfully':'ลบข้อมูลเรียบร้อย');
+  await fetchAll();
 }
 
-
 window.onload = () => { applyTheme(); applyLanguage(); checkSession(); };
-document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'visible') {
-    if (typeof fetchAll === 'function') {
-      await fetchAll();
-    }
-    if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
-    renderCategoryChips();
-    renderProducts();
-  }
-});
-
-
-// ตรวจจับเมื่อหน้าต่างแอปได้รับโฟกัสอีกครั้ง (Window Focus)
-window.addEventListener('focus', () => {
-  renderCategoryChips();
-  renderProducts();
-});
 
 </script>
 </body>
