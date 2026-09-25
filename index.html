@@ -818,10 +818,13 @@ async function checkSession() {
   checkAuth();
   setupRealtime();
   await fetchAll();
-  if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
-  renderCategoryChips();
-  renderProducts();
-  if (typeof showPage === 'function') showPage('page-home');
+if (!state.currentCategory) state.currentCategory = (appLang === 'en' ? 'All' : 'ทั้งหมด');
+renderCategoryChips();
+renderProducts();
+
+// เปิดหน้าหลักด้วย classList โดยตรง ป้องกัน Error สคริปต์พัง
+const homePage = document.getElementById('page-home');
+if (homePage) homePage.classList.add('active');
 
 
 
